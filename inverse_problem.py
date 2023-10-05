@@ -22,6 +22,6 @@ import numpy as np
 
 start = time.time()
 
-mesh = UnitSquareMesh(100, 100)
+mesh = UnitSquareMesh(options.meshsize, options.meshsize)
 
 V = FunctionSpace(mesh, 'CG', 1)
