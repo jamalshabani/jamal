@@ -1,47 +1,3 @@
-# Background
-# **********
-# Some time-dependent problems have control variables that are distributed over
-# all (or some) time-levels. The following example demonstrates how this can be
-# implemented in dolfin-adjoint.
-#
-# One important aspect to consider is the regularisation term. For
-# time-distributed controls, one typically uses wishes to enforce smoothness
-# of the control variables in time. We will also discuss how such a
-# regularisation term is implemented.
-#
-# Problem definition
-# ******************
-# We consider the heat equation with a time-dependent source term :math:`f`, which will be
-# our control variable:
-#
-# .. math::
-#            \frac{\partial u}{\partial t} - \nu \nabla^{2} u= f(t)
-#             \quad & \textrm{in } \Omega \times (0, T), \\
-#            u = 0  \quad & \textrm{for } \Omega \times \{0\} \\
-#            u = 0  \quad & \textrm{for } \partial \Omega \times (0, T).
-#
-#
-# where :math:`\Omega` is the unit square, :math:`T` is the final time, :math:`u`
-# is the unkown temperature variation, :math:`\nu` is the thermal diffusivity, and
-# :math:`g` is the initial temperature.
-#
-# The objective value, the model output of interest, is the norm of the
-# temperature variable integrated over time, plus a regularisation term that
-# enforces smoothness of the control in time:
-#
-# .. math::
-#            J(u, f) := \int_0^T \int_\Omega (u-d)^2 \textrm{d} \Omega \text{d}t +
-#                       \frac{\alpha}{2} \int_0^T \int_\Omega \dot f^2 \textrm{d} \Omega \text{d}t
-#
-# The aim of this example is to solve the minimization problem :math:`\min_f J`
-# for some given data :math:`d`. 
-
-# Implementation
-# **************
-
-# We start by importing the needed FEniCS and dolfin-adjoint modules (note that
-# `fenics_adjoint` is an alias for `dolfin_adjoint`):
-
 from fenics import *
 from fenics_adjoint import *
 from collections import OrderedDict
@@ -54,7 +10,7 @@ nu = Constant(1e-5)
 
 # Next, we define the discretization space:
 
-mesh = UnitSquareMesh(8, 8)
+mesh = UnitSquareMesh(100, 100)
 V = FunctionSpace(mesh, "CG", 1)
 
 # ... and time:
