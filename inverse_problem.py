@@ -1,5 +1,6 @@
 from fenics import *
 from fenics_adjoint import *
+from side_functions import *
 
 # Next, we define the expressions for observational data :math:`d` and the
 # viscosity :math:`\nu`.
@@ -10,6 +11,7 @@ nu = Constant(1e-5)
 mesh = UnitSquareMesh(8, 8)
 V = FunctionSpace(mesh, "CG", 1)
 
+File("problem/u_star1").write(u_star1)
 # ... and time:
 
 dt = Constant(0.1)
