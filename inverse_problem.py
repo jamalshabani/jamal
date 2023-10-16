@@ -1,3 +1,23 @@
+def parse():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-vs', '--volume_s', type = float, default = 0.3, help = 'Volume percentage for structural material')
+    parser.add_argument('-vr', '--volume_r', type = float, default = 0.3, help = 'Volume percentage for responsive material')
+    parser.add_argument('-n', '--maxit', type = int, default = 2000, help = 'Number of iterations')
+    parser.add_argument('-k', '--kappa', type = float, default = 5.0e-4, help = 'Weight of Modica-Mortola')
+    parser.add_argument('-e', '--epsilon', type = float, default = 4.0e-3, help = 'Phase-field regularization parameter')
+    parser.add_argument('-o', '--output', type = str, default = 'output', help = 'Output folder')
+    parser.add_argument('-es', '--esmodulus', type = float, default = 1.0e1, help = 'Elastic Modulus for structural material')
+    parser.add_argument('-er', '--ermodulus', type = float, default = 1.0e-1, help = 'Elastic Modulus for responsive material')
+    parser.add_argument('-p', '--power_p', type = float, default = 2.0, help = 'Power for elasticity interpolation')
+    parser.add_argument('-q', '--power_q', type = float, default = 2.0, help = 'Power for multiple-well function')
+    parser.add_argument('-s', '--steamy', type = float, default = 1.0, help = 'Initial stimulus')
+
+    options = parser.parse_args()
+    return options
+
+options = parse()
+
 from fenics import *
 from fenics_adjoint import *
 from collections import OrderedDict
