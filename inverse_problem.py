@@ -40,7 +40,10 @@ Id = Identity(mesh.geometric_dimension()) #Identity tensor
 V = FunctionSpace(mesh, "CG", 1)
 VV = VectorFunctionSpace(mesh, "CG", 1)
 
-
+# Create initial designs
+rhoi = Function(V, name = "Materual density")
+rhos = Function(V, name = "Structural material")  # Structural material 1(Blue)
+rhor = Function(V, name = "Responsive material")  # Responsive material 2(Red)
 
 
 
