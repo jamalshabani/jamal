@@ -37,11 +37,23 @@ dx = Measure('dx', domain = mesh, subdomain_data = subdomains)
 
 Id = Identity(mesh.geometric_dimension()) #Identity tensor
 
+V = FunctionSpace(mesh, "CG", 1)
+VV = VectorFunctionSpace(mesh, "CG", 1)
+
+
+
+
+
+
+
+
+
+
+
 data = Expression("16*x[0]*(x[0]-1)*x[1]*(x[1]-1)*sin(pi*t)", t=0, degree=4)
 nu = Constant(1e-5)
 
-V = FunctionSpace(mesh, "CG", 1)
-VV = VectorFunctionSpace(mesh, "CG", 1)
+
 
 # ... and time:
 
