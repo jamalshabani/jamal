@@ -45,6 +45,11 @@ rhoi = Function(V, name = "Materual density")
 rhos = Function(V, name = "Structural material")  # Structural material 1(Blue)
 rhor = Function(V, name = "Responsive material")  # Responsive material 2(Red)
 
+# Create initial design
+rhos.interpolate(Constant(options.volume_s))
+rhor.interpolate(Constant(options.volume_r))
+###### End Initial Design #####
+
 
 
 
