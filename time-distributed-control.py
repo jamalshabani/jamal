@@ -1,3 +1,16 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# .. _time_distributed_control:
+#
+# .. py:currentmodule:: dolfin_adjoint
+#
+# Time-distributed controls
+# =========================
+#
+# .. sectionauthor:: Simon W. Funke <simon@simula.no>
+#
+#
 # Background
 # **********
 # Some time-dependent problems have control variables that are distributed over
@@ -81,7 +94,6 @@ def solve_heat(ctrls):
 
     f = Function(V, name="source")
     u_0 = Function(V, name="solution")
-    uu = Function(V, name="solution")
     d = Function(V, name="data")
 
     F = ( (u - u_0)/dt*v + nu*inner(grad(u), grad(v)) - f*v)*dx
@@ -102,9 +114,6 @@ def solve_heat(ctrls):
 
         # Solve PDE
         solve(a == L, u_0, bc)
-        solve(a == L, uu, bc)
-        File('problem/solution.pvd') << (uu, t)
-        u_0.assign(uu)
 
         # Implement a trapezoidal rule 
         if t > T - float(dt):
@@ -159,10 +168,12 @@ m = [Control(c) for c in ctrls.values()]
 rf = ReducedFunctional(J, m)
 opt_ctrls = minimize(rf, options={"maxiter": 50})
 
-for i in range(len(opt_ctrls)):
-    File("problem/controls.pvd") << opt_ctrls[i]
-print(type(opt_ctrls[10]))
-
+from matplotlib import pyplot, rc
+rc('text', usetex=True)
+x = [c((0.5, 0.5)) for c in opt_ctrls]
+pyplot.plot(x, label="$\\alpha={}$".format(float(alpha)))
+pyplot.ylim([-3, 3])
+pyplot.legend()
 
 # If we solve this optimisation problem with varying :math:`\alpha` parameters,
 # we observe that we get different behaviour in the controls: the higher the
