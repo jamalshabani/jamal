@@ -208,13 +208,13 @@ P = func1 + func2
 J = j + assemble(regularisation) + assemble(P)
 ms = Control(rhos)
 mr = Control(rhor)
-m = [Control(c) for c in ctrls.values()].append(ms).append(mr)
-print(type(mc))
-print(len(mc))
+m = [Control(c) for c in ctrls.values()]
+m.append(ms)
+m.append(mr)
 
 # Finally, we define the reduced functional and solve the optimisation problem:
 
-Jhat = ReducedFunctional(J, [ms, mr, m])
+Jhat = ReducedFunctional(J, m)
 
 # Define box contraints
 lm = 0.0
@@ -223,14 +223,28 @@ um = 1.0
 boxconstraints = [(lm, um) for i in range(12)]
 print(len(boxconstraints))
 
-volumes_constraint = UFLInequalityConstraint((options.volume_s - rhos)*dx, [ms, mr])
-volumer_constraint = UFLInequalityConstraint((options.volume_r - rhor)*dx, [ms, mr])
+volumes_constraint = UFLInequalityConstraint((options.volume_s - rhos)*dx, m)
+volumer_constraint = UFLInequalityConstraint((options.volume_r - rhor)*dx, m)
 
 problem = MinimizationProblem(Jhat, bounds = boxconstraints, constraints = [volumes_constraint, volumer_constraint])
 
 parameters = {"acceptable_tol": 1.0e-5, "maximum_iterations": options.maxit}
 solver = IPOPTSolver(problem, parameters = parameters)
-rhos_opt, rhor_opt, opt_ctrls = solver.solve()
+opt_ctrls = solver.solve()
+print(type(opt_ctrls))
+print(len(opt_ctrls))
+
+rho_final = Function(V, name = "Material density")
+rhos_final = Function(V, name = "Structural material")
+rhor_final = Function(V, name = "Responsive material")
+
+rhos_final.assign(opt_ctrls[10])
+rhor_final.assign(opt_ctrls[11])
+rho_final.assign(opt_ctrls[11] - opt_ctrls[10])
+
+File("problem/rho-final.pvd").write(rho_final)
+File("problem/rhos-final.pvd").write(rhos_final)
+File("problem/rhor-final.pvd").write(rhor_final)
 
 #opt_ctrls = minimize(rf, options={"maxiter": 50})
 
