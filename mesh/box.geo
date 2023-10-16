@@ -1,0 +1,14 @@
+SetFactory("OpenCASCADE");
+W = 1/3;
+D = 1/3;
+H = 1.5;
+d = 1/9;
+Box(1) = {-W/2,-D/2,-H/2,W,D,H};
+Box(2) = {-d/2,-d/2,H/2-d,d,d,d};
+v() = BooleanFragments{ Volume{1}; Delete; }{ Volume{2}; Delete; };
+Coherence;
+Physical Volume(3) = {3};
+Physical Volume(4) = {2};
+Physical Surface("leftwall", 7) = {17};
+Physical Surface("rightwall", 8) = {12};
+MeshSize{ PointsOf{ Volume{:}; } } = 0.02;
