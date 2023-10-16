@@ -127,13 +127,8 @@ def sigma_s(u, Id):
 def sigma_r(u, Id):
     return lambda_r * tr(epsilon(u)) * Id + 2 * mu_r * epsilon(u)
 
-
 dt = Constant(0.1)
 T = 1
-
-# We are considering a time-distributed forcing as control. In the next step,
-# we create one control function for each timestep in the model, and store all
-# controls in a dictionary that maps timestep to control function:
 
 ctrls = OrderedDict()
 t = float(dt)
@@ -171,11 +166,6 @@ def solve_pdes(ctrls):
     func2 = kappa_m_e * (func2_sub1 + func2_sub2 + func2_sub3)
     P = func1 + func2
 
-    # Define the Modica-Mortola functional for "g"
-    # func1g = kappa_d_e * W(g) * dx
-    # func2g = kappa_m_e * inner(grad(g), grad(g)) * dx
-    # Pg = func1g + func2g
-
     # Define the weak form for forward PDE
     a_forward_v = h_v(rhos, rhor) * inner(sigma_v(u, Id), epsilon(v)) * dx
     a_forward_s = h_s(rhos) * inner(sigma_s(u, Id), epsilon(v)) * dx
@@ -210,31 +200,7 @@ def solve_pdes(ctrls):
 
     return s_0, u, j
 
-u, d, j = solve_heat(ctrls)
-
-# With this preparation steps, we are now ready to define the functional.
-# First we discretise the regularisation term
-#
-# .. math::
-#             \frac{\alpha}{2} \int_0^T \int_\Omega \dot f^2 \textrm{d} \Omega \text{d}t
-#
-# Note, that :math:`f` is a piecewise linear function in time over the time intervals :math:`K = [(0, \delta t), (\delta t, 2 \delta t), \dots, (T-\delta
-# t, T)]`. Thus, we can write the integral as a sum over all intervals
-#
-# .. math::
-#             \frac{\alpha}{2} \sum_{a_k, b_k \in K} \int_{a_k}^{b_k} \int_\Omega \dot f(t)^2 \textrm{d} \Omega\text{d}t
-#
-# Discretising the time-derivative yields:
-#
-# .. math::
-#             \frac{\alpha}{2} \sum_K \int_{a_k}^{b_k}
-#             \int_\Omega \left(\frac{f(b_k)-
-#             f(a_k)}{b_k-a_k}\right)^2\textrm{d}\Omega \\
-#             = \frac{\alpha}{2} \sum_K (b_k-a_k)^{-1}
-#             \int_\Omega \left(f(b_k)- f(a_k)\right)^2\textrm{d}\Omega
-#
-#
-# In code this is translates to:
+u, d, j = solve_pdes(ctrls)
 
 alpha = Constant(1e-1)
 regularisation = alpha/2*sum([1/dt*(gb - ga)**2*dx for gb, ga in
