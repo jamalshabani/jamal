@@ -205,7 +205,7 @@ func2_sub3 = inner(grad(v_r(rhor)), grad(v_r(rhor))) * dx
 func2 = kappa_m_e * (func2_sub1 + func2_sub2 + func2_sub3)
 P = func1 + func2
 
-J = j + assemble(regularisation) + P
+J = j + assemble(regularisation) + assemble(P)
 ms = Control(rhos)
 mr = Control(rhor)
 m = [Control(c) for c in ctrls.values()]
@@ -220,8 +220,8 @@ um = 1.0
 
 boxconstraints = [(lm, um), (lm, um), (lm, um)]
 
-volumes_constraint = UFLInequalityConstraint((options.volume_s - rhos)*dx, [ms, mr, m])
-volumer_constraint = UFLInequalityConstraint((options.volume_r - rhor)*dx, [ms, mr, m])
+volumes_constraint = UFLInequalityConstraint((options.volume_s - rhos)*dx, [ms, mr])
+volumer_constraint = UFLInequalityConstraint((options.volume_r - rhor)*dx, [ms, mr])
 
 problem = MinimizationProblem(Jhat, bounds = boxconstraints, constraints = [volumes_constraint, volumer_constraint])
 
