@@ -208,7 +208,9 @@ P = func1 + func2
 J = j + assemble(regularisation) + assemble(P)
 ms = Control(rhos)
 mr = Control(rhor)
-m = [Control(c) for c in ctrls.values()]
+m = [Control(c) for c in ctrls.values()].append(ms).append(mr)
+print(type(mc))
+print(len(mc))
 
 # Finally, we define the reduced functional and solve the optimisation problem:
 
@@ -218,7 +220,8 @@ Jhat = ReducedFunctional(J, [ms, mr, m])
 lm = 0.0
 um = 1.0
 
-boxconstraints = [(lm, um), (lm, um), (lm, um)]
+boxconstraints = [(lm, um) for i in range(12)]
+print(len(boxconstraints))
 
 volumes_constraint = UFLInequalityConstraint((options.volume_s - rhos)*dx, [ms, mr])
 volumer_constraint = UFLInequalityConstraint((options.volume_r - rhor)*dx, [ms, mr])
