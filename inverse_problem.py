@@ -59,22 +59,78 @@ kappa_m_e = Constant(kappa * epsilon)
 
 # Define the boundary/traction force
 f = Constant((0.0, -1.0))
-u_star = Constant((0.0, t))
+#u_star = Constant((0.0, t))
 
+# Young's modulus of the beam and poisson ratio
+E_v = Constant(delta)
+E_s = Constant(options.esmodulus)
+E_r = Constant(options.ermodulus)
+nu = Constant(0.3) #nu poisson ratio
 
+mu_v = E_v/(2 * (1 + nu))
+lambda_v = (E_v * nu)/((1 + nu) * (1 - 2 * nu))
 
+mu_s = E_s/(2 * (1 + nu))
+lambda_s = (E_s * nu)/((1 + nu) * (1 - 2 * nu))
 
+mu_r = E_r/(2 * (1 + nu))
+lambda_r = (E_r * nu)/((1 + nu) * (1 - 2 * nu))
 
+def v_v(rhos, rhor):
+    return 1 - rhos - rhor
 
-data = Expression("16*x[0]*(x[0]-1)*x[1]*(x[1]-1)*sin(pi*t)", t=0, degree=4)
-nu = Constant(1e-5)
+def v_s(rhos):
+    return rhos
 
+def v_r(rhor):
+    return rhor
 
+def k(rhos, rhor):
+    return delta + (1 - delta) * (rhos + rhor)
 
-# ... and time:
+# Define h_v(rho)=rho_v^(p)
+def h_v(rhos, rhor):
+    return pow((1 - rhos - rhor), options.power_p)
+
+# Define h_s(rho)=rho_s^(p)
+def h_s(rhos):
+    return pow(rhos, options.power_p)
+
+# Define h_r(rho)=rho_r^(p)
+def h_r(rhor):
+    return pow(rhor, options.power_p)
+
+# Define the double-well potential function
+# W(x, y) = x^q * (1 - x)^q
+def W(x):
+    return pow(x, options.power_q) * pow((1 - x), options.power_q)
+
+def WW(x, y):
+	return pow((x + y), options.power_q) * pow((1 - x), options.power_q) * pow((1 - y), options.power_q)
+
+# Define strain tensor epsilon(u)
+def epsilon(u):
+    return 0.5 * (grad(u) + grad(u).T)
+
+# Define the residual stressescc
+def sigma_A(A, Id):
+	return lambda_r * tr(A) * Id + 2 * mu_r * A
+
+# Define the stress tensor sigma_v(u) for void
+def sigma_v(u, Id):
+    return lambda_v * tr(epsilon(u)) * Id + 2 * mu_v * epsilon(u)
+
+# Define the stress tensor sigma_s(u) for structural material
+def sigma_s(u, Id):
+    return lambda_s * tr(epsilon(u)) * Id + 2 * mu_s * epsilon(u)
+
+# Define the stress tensor sigma_r(u) for responsive material
+def sigma_r(u, Id):
+    return lambda_r * tr(epsilon(u)) * Id + 2 * mu_r * epsilon(u)
+
 
 dt = Constant(0.1)
-T = 2
+T = 1
 
 # We are considering a time-distributed forcing as control. In the next step,
 # we create one control function for each timestep in the model, and store all
@@ -89,17 +145,34 @@ while t <= T:
 # The following function implements a heat equation solver in FEniCS,
 # and constructs the first functional term.
 
-def solve_heat(ctrls):
-    u = TrialFunction(V)
-    v = TestFunction(V)
+def solve_pdes(ctrls):
+    s = TrialFunction(V)
+    w = TestFunction(V)
 
-    f = Function(V, name="source")
-    u_0 = Function(V, name="solution")
-    d = Function(V, name="data")
+    # Define test function and beam displacement
+    v = TestFunction(VV)
+    u = Function(VV, name = "Displacement")
 
-    F = ( (u - u_0)/dt*v + nu*inner(grad(u), grad(v)) - f*v)*dx
+    g = Function(V, name="source")
+    s_0 = Function(V, name="solution")
+
+    F = ( (s - s_0)/dt*w + nu*inner(grad(s), grad(w)) - g*w)*dx
     a, L = lhs(F), rhs(F)
-    bc = DirichletBC(V, 0, "on_boundary")
+    # The left side of the beam is clamped
+
+    bcs = DirichletBC(VV, Constant((0, 0)), boundaries, 7)
+    bc = DirichletBC(V, Constant(0.0), "on_boundary")
+
+    # Define the Modica-Mortola functional
+    func1 = kappa_d_e * WW(rhos, rhor) * dx
+
+    func2_sub1 = inner(grad(v_v(rhos, rhor)), grad(v_v(rhos, rhor))) * dx
+    func2_sub2 = inner(grad(v_s(rhos)), grad(v_s(rhos))) * dx
+    func2_sub3 = inner(grad(v_r(rhor)), grad(v_r(rhor))) * dx
+    func2 = kappa_m_e * (func2_sub1 + func2_sub2 + func2_sub3)
+    P = func1 + func2
+
+    
 
     t = float(dt)
 
