@@ -176,21 +176,19 @@ def solve_pdes(ctrls):
     R_fwd = a_forward - L_forward
 
     t = float(dt)
-    u_star = Constant(0.0, 0.0)
+    u_star = Constant((0.0, 0.0))
 
     j = 0.5*float(dt)*assemble((u - u_star)**2*dx)
 
     while t <= T:
         # Update source term from control array
-        f.assign(ctrls[t])
-        u_star = Constant(0.0, t)
+        g.assign(ctrls[t])
+        u_star = Constant((0.0, t))
 
-        # Solve PDE
-        solve(a == L, s_0, bcs = bc, solver_parameters = {"newton_solver": {"absolute_tolerance": 1.0e-7,
-                                                              "maximum_iterations": 20}})
+        # Solve PDEs
+        solve(a == L, s_0, bcs = bc)
         
-        solve(R_fwd == 0, u, bcs = bcs, solver_parameters = {"newton_solver": {"absolute_tolerance": 1.0e-7,
-                                                              "maximum_iterations": 20}})
+        solve(R_fwd == 0, u, bcs = bcs)
 
         j += 0.5*float(dt)*assemble((u - u_star)**2*dx)
         
