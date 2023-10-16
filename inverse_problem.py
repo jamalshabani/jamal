@@ -57,6 +57,10 @@ epsilon = Constant(options.epsilon)
 kappa_d_e = Constant(kappa / epsilon)
 kappa_m_e = Constant(kappa * epsilon)
 
+# Define the boundary/traction force
+f = Constant((0.0, -1.0))
+u_star = Constant((0.0, t))
+
 
 
 
