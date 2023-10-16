@@ -172,22 +172,34 @@ def solve_pdes(ctrls):
     func2 = kappa_m_e * (func2_sub1 + func2_sub2 + func2_sub3)
     P = func1 + func2
 
-    
+    # Define the Modica-Mortola functional for "g"
+    # func1g = kappa_d_e * W(g) * dx
+    # func2g = kappa_m_e * inner(grad(g), grad(g)) * dx
+    # Pg = func1g + func2g
+
+    # Define the weak form for forward PDE
+    a_forward_v = h_v(rhos, rhor) * inner(sigma_v(u, Id), epsilon(v)) * dx
+    a_forward_s = h_s(rhos) * inner(sigma_s(u, Id), epsilon(v)) * dx
+    a_forward_r = h_r(rhor) * inner(sigma_r(u, Id), epsilon(v)) * dx
+    a_forward = a_forward_v + a_forward_s + a_forward_r
+
+    L_forward = inner(f, v) * ds(8) + s_0 * h_r(rhor) * inner(sigma_A(Id, Id), epsilon(v)) * dx
+    R_fwd = a_forward - L_forward
 
     t = float(dt)
+    u_star = Constant(0.0, t)
 
-    j = 0.5*float(dt)*assemble((u_0 - d)**2*dx)
+    j = 0.5*float(dt)*assemble((u - u_star)**2*dx)
 
     while t <= T:
         # Update source term from control array
         f.assign(ctrls[t])
 
-        # Update data function
-        data.t = t
-        d.assign(interpolate(data, V))
-
         # Solve PDE
-        solve(a == L, u_0, bc)
+        solve(a == L, s_0, bcs = bc, solver_parameters = {"newton_solver": {"absolute_tolerance": 1.0e-7,
+                                                              "maximum_iterations": 20}})
+        solve(R_fwd == 0, u, bcs = bcs, solver_parameters = {"newton_solver": {"absolute_tolerance": 1.0e-7,
+                                                              "maximum_iterations": 20}})
 
         # Implement a trapezoidal rule 
         if t > T - float(dt):
