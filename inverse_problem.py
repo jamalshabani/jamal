@@ -50,8 +50,12 @@ rhos.interpolate(Constant(options.volume_s))
 rhor.interpolate(Constant(options.volume_r))
 ###### End Initial Design #####
 
-
-
+# Define the constants and parameters used in the problem
+kappa = Constant(options.kappa)
+delta = Constant(1.0e-3)
+epsilon = Constant(options.epsilon)
+kappa_d_e = Constant(kappa / epsilon)
+kappa_m_e = Constant(kappa * epsilon)
 
 
 
