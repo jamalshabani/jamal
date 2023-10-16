@@ -157,15 +157,6 @@ def solve_pdes(ctrls):
     bcs = DirichletBC(VV, Constant((0, 0)), boundaries, 7)
     bc = DirichletBC(V, Constant(0.0), "on_boundary")
 
-    # Define the Modica-Mortola functional
-    func1 = kappa_d_e * WW(rhos, rhor) * dx
-
-    func2_sub1 = inner(grad(v_v(rhos, rhor)), grad(v_v(rhos, rhor))) * dx
-    func2_sub2 = inner(grad(v_s(rhos)), grad(v_s(rhos))) * dx
-    func2_sub3 = inner(grad(v_r(rhor)), grad(v_r(rhor))) * dx
-    func2 = kappa_m_e * (func2_sub1 + func2_sub2 + func2_sub3)
-    P = func1 + func2
-
     # Define the weak form for forward PDE
     a_forward_v = h_v(rhos, rhor) * inner(sigma_v(u, Id), epsilon(v)) * dx
     a_forward_s = h_s(rhos) * inner(sigma_s(u, Id), epsilon(v)) * dx
@@ -205,6 +196,14 @@ regularisation = alpha/2*sum([1/dt*(gb - ga)**2*dx for gb, ga in
     zip(list(ctrls.values())[1:], list(ctrls.values())[:-1])])
 
 # We add the regularisation term to the first functional term and define define the controls:
+# Define the Modica-Mortola functional
+func1 = kappa_d_e * WW(rhos, rhor) * dx
+
+func2_sub1 = inner(grad(v_v(rhos, rhor)), grad(v_v(rhos, rhor))) * dx
+func2_sub2 = inner(grad(v_s(rhos)), grad(v_s(rhos))) * dx
+func2_sub3 = inner(grad(v_r(rhor)), grad(v_r(rhor))) * dx
+func2 = kappa_m_e * (func2_sub1 + func2_sub2 + func2_sub3)
+P = func1 + func2
 
 J = j + assemble(regularisation) + P
 ms = Control(rhos)
