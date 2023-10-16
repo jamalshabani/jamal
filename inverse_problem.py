@@ -25,6 +25,18 @@ from collections import OrderedDict
 # Next, we define the expressions for observational data :math:`d` and the
 # viscosity :math:`\nu`.
 
+# Import gmesh
+xml_mesh = "mesh/leastsquare.xml"
+mesh = Mesh(xml_mesh)
+
+subdomains = MeshFunction('size_t', mesh, "mesh/leastsquare_physical_region.xml")
+boundaries = MeshFunction('size_t', mesh, "mesh/leastsquare_facet_region.xml")
+
+ds = Measure('ds', domain = mesh, subdomain_data = boundaries)
+dx = Measure('dx', domain = mesh, subdomain_data = subdomains)
+
+Id = Identity(mesh.geometric_dimension()) #Identity tensor
+
 data = Expression("16*x[0]*(x[0]-1)*x[1]*(x[1]-1)*sin(pi*t)", t=0, degree=4)
 nu = Constant(1e-5)
 
