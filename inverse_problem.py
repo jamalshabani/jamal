@@ -238,41 +238,34 @@ u, d, j = solve_heat(ctrls)
 # In code this is translates to:
 
 alpha = Constant(1e-1)
-regularisation = alpha/2*sum([1/dt*(fb-fa)**2*dx for fb, fa in
+regularisation = alpha/2*sum([1/dt*(gb - ga)**2*dx for gb, ga in
     zip(list(ctrls.values())[1:], list(ctrls.values())[:-1])])
 
 # We add the regularisation term to the first functional term and define define the controls:
 
-J = j + assemble(regularisation)
+J = j + assemble(regularisation) + P
+ms = Control(rhos)
+mr = Control(rhor)
 m = [Control(c) for c in ctrls.values()]
 
 # Finally, we define the reduced functional and solve the optimisation problem:
 
-rf = ReducedFunctional(J, m)
-opt_ctrls = minimize(rf, options={"maxiter": 50})
+Jhat = ReducedFunctional(J, [ms, mr, m])
 
-from matplotlib import pyplot, rc
-rc('text', usetex=True)
-x = [c((0.5, 0.5)) for c in opt_ctrls]
-pyplot.plot(x, label="$\\alpha={}$".format(float(alpha)))
-pyplot.ylim([-3, 3])
-pyplot.legend()
+# Define box contraints
+lm = 0.0
+um = 1.0
 
-# If we solve this optimisation problem with varying :math:`\alpha` parameters,
-# we observe that we get different behaviour in the controls: the higher the
-# alpha value, the "smoother" the control function becomes. The following plots
-# show the optimised control evaluated at the middle point :math:`(0.5, 0.5)`
-# over time for different :math:`\alpha` values:
+boxconstraints = [(lm, um), (lm, um), (lm, um)]
 
-# .. image:: control_alpha=0.0001.png
-#     :scale: 45
-#     :align: left
-# .. image:: control_alpha=0.001.png
-#     :scale: 45
-#     :align: right
-# .. image:: control_alpha=0.01.png
-#     :scale: 45
-#     :align: left
-# .. image:: control_alpha=0.1.png
-#     :scale: 45
-#     :align: right
+volumes_constraint = UFLInequalityConstraint((options.volume_s - rhos)*dx, [ms, mr, m])
+volumer_constraint = UFLInequalityConstraint((options.volume_r - rhor)*dx, [ms, mr, m])
+
+problem = MinimizationProblem(Jhat, bounds = boxconstraints, constraints = [volumes_constraint, volumer_constraint])
+
+parameters = {"acceptable_tol": 1.0e-5, "maximum_iterations": options.maxit}
+solver = IPOPTSolver(problem, parameters = parameters)
+rhos_opt, rhor_opt, opt_ctrls = solver.solve()
+
+#opt_ctrls = minimize(rf, options={"maxiter": 50})
+
