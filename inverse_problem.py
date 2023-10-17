@@ -240,14 +240,64 @@ rhos_final.assign(opt_ctrls[10])
 rhor_final.assign(opt_ctrls[11])
 rho_final.assign(opt_ctrls[11] - opt_ctrls[10])
 
-
 opt_ctrls.pop(-1)
 opt_ctrls.pop(-1)
-
 
 File("problem/rho-final.pvd").write(rho_final)
 File("problem/rhos-final.pvd").write(rhos_final)
 File("problem/rhor-final.pvd").write(rhor_final)
+
+def solve_pdes_after(ctrls):
+    s = TrialFunction(V)
+    w = TestFunction(V)
+
+    # Define test function and beam displacement
+    v = TestFunction(VV)
+    u = Function(VV, name = "Displacement")
+
+    g = Function(V, name="source")
+    s_0 = Function(V, name="solution")
+
+    F = ( (s - s_0)/dt*w + nu*inner(grad(s), grad(w)) - g*w)*dx
+    a, L = lhs(F), rhs(F)
+    # The left side of the beam is clamped
+
+    bcs = DirichletBC(VV, Constant((0, 0)), boundaries, 7)
+    bc = DirichletBC(V, Constant(0.0), "on_boundary")
+
+    # Define the weak form for forward PDE
+    a_forward_v = h_v(rhos, rhor) * inner(sigma_v(u, Id), epsilon(v)) * dx
+    a_forward_s = h_s(rhos) * inner(sigma_s(u, Id), epsilon(v)) * dx
+    a_forward_r = h_r(rhor) * inner(sigma_r(u, Id), epsilon(v)) * dx
+    a_forward = a_forward_v + a_forward_s + a_forward_r
+
+    L_forward = s_0 * h_r(rhor) * inner(sigma_A(Id, Id), epsilon(v)) * dx
+    R_fwd = a_forward - L_forward
+
+    t = float(dt)
+    u_star = Constant((0.0, 0.0))
+
+    j = 0.5*float(dt)*assemble((u - u_star)**2*dx)
+
+    while t <= T:
+        # Update source term from control array
+        g.assign(ctrls[t*10])
+        u_star = Constant((0.0, t))
+
+        # Solve PDEs
+        solve(a == L, s_0, bcs = bc)
+        
+        solve(R_fwd == 0, u, bcs = bcs)
+
+        j += 0.5*float(dt)*assemble((u - u_star)**2*dx)
+
+        File("problem/u_solution.pvd") << (u, t) 
+        File("problem/s_solution.pvd") << (s_0, t)
+
+        # Update time
+        t += float(dt)
+
+solve_pdes_after(opt_ctrls)
 
 #opt_ctrls = minimize(rf, options={"maxiter": 50})
 
