@@ -150,7 +150,7 @@ def solve_pdes(ctrls):
     g = Function(V, name="source")
     s_0 = Function(V, name="solution")
 
-    F = ( (s - s_0)/dt*w + nu*inner(grad(s), grad(w)) - g*w)*dx
+    F = ( (s - s_0)/dt*w + k(rhos, rhor)*inner(grad(s), grad(w)) - g*w)*dx
     a, L = lhs(F), rhs(F)
     # The left side of the beam is clamped
 
@@ -183,7 +183,6 @@ def solve_pdes(ctrls):
 
         j += 0.5*float(dt)*assemble((u - u_star)**2*dx)
         
-
         # Update time
         t += float(dt)
 
@@ -220,7 +219,7 @@ Jhat = ReducedFunctional(J, m)
 lm = 0.0
 um = 1.0
 
-boxconstraints = [(lm, um) for i in range(12)]
+boxconstraints = [(lm, um) for i in range(len(m))]
 print(len(boxconstraints))
 
 volumes_constraint = UFLInequalityConstraint((options.volume_s - rhos)*dx, m)
