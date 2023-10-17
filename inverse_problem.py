@@ -231,8 +231,6 @@ problem = MinimizationProblem(Jhat, bounds = boxconstraints, constraints = [volu
 parameters = {"acceptable_tol": 1.0e-5, "maximum_iterations": options.maxit}
 solver = IPOPTSolver(problem, parameters = parameters)
 opt_ctrls = solver.solve()
-print(type(opt_ctrls))
-print(len(opt_ctrls))
 
 rho_final = Function(V, name = "Material density")
 rhos_final = Function(V, name = "Structural material")
@@ -241,6 +239,11 @@ rhor_final = Function(V, name = "Responsive material")
 rhos_final.assign(opt_ctrls[10])
 rhor_final.assign(opt_ctrls[11])
 rho_final.assign(opt_ctrls[11] - opt_ctrls[10])
+
+
+opt_ctrls.pop(-1)
+opt_ctrls.pop(-1)
+
 
 File("problem/rho-final.pvd").write(rho_final)
 File("problem/rhos-final.pvd").write(rhos_final)
