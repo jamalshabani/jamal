@@ -236,16 +236,16 @@ rho_final = Function(V, name = "Material density")
 rhos_final = Function(V, name = "Structural material")
 rhor_final = Function(V, name = "Responsive material")
 
-rhos_final.assign(opt_ctrls[10])
-rhor_final.assign(opt_ctrls[11])
-rho_final.assign(opt_ctrls[11] - opt_ctrls[10])
-
-opt_ctrls.pop(-1)
-opt_ctrls.pop(-1)
+rhos_final.assign(opt_ctrls[-2])
+rhor_final.assign(opt_ctrls[-1])
+rho_final.assign(opt_ctrls[-1] - opt_ctrls[-2])
 
 File("problem/rho-final.pvd").write(rho_final)
 File("problem/rhos-final.pvd").write(rhos_final)
 File("problem/rhor-final.pvd").write(rhor_final)
+
+vtkfiles = File("problem/ssolution.pvd")
+vtkfileu = File("problem/usolution.pvd")
 
 def solve_pdes_after(ctrls):
     s = TrialFunction(V)
@@ -253,7 +253,7 @@ def solve_pdes_after(ctrls):
 
     # Define test function and beam displacement
     v = TestFunction(VV)
-    u = Function(VV, name = "Displacement")
+    us = Function(VV, name = "Displacement")
 
     g = Function(V, name="source")
     s_0 = Function(V, name="solution")
@@ -266,33 +266,31 @@ def solve_pdes_after(ctrls):
     bc = DirichletBC(V, Constant(0.0), "on_boundary")
 
     # Define the weak form for forward PDE
-    a_forward_v = h_v(rhos, rhor) * inner(sigma_v(u, Id), epsilon(v)) * dx
-    a_forward_s = h_s(rhos) * inner(sigma_s(u, Id), epsilon(v)) * dx
-    a_forward_r = h_r(rhor) * inner(sigma_r(u, Id), epsilon(v)) * dx
+    a_forward_v = h_v(opt_ctrls[-2], opt_ctrls[-1]) * inner(sigma_v(us, Id), epsilon(v)) * dx
+    a_forward_s = h_s(opt_ctrls[-2]) * inner(sigma_s(us, Id), epsilon(v)) * dx
+    a_forward_r = h_r(opt_ctrls[-1]) * inner(sigma_r(us, Id), epsilon(v)) * dx
     a_forward = a_forward_v + a_forward_s + a_forward_r
 
-    L_forward = s_0 * h_r(rhor) * inner(sigma_A(Id, Id), epsilon(v)) * dx
+    L_forward = s_0 * h_r(opt_ctrls[-1]) * inner(sigma_A(Id, Id), epsilon(v)) * dx
     R_fwd = a_forward - L_forward
 
     t = float(dt)
-    u_star = Constant((0.0, 0.0))
-
-    j = 0.5*float(dt)*assemble((u - u_star)**2*dx)
 
     while t <= T:
         # Update source term from control array
-        g.assign(ctrls[t*10])
-        u_star = Constant((0.0, t))
+        g.assign(ctrls[int(t*10)])
 
         # Solve PDEs
         solve(a == L, s_0, bcs = bc)
-        
-        solve(R_fwd == 0, u, bcs = bcs)
+        solve(R_fwd == 0, us, bcs = bcs)
 
-        j += 0.5*float(dt)*assemble((u - u_star)**2*dx)
+        print(" ")
+        print("The values of i = ", round(10*t))
+        print("The values of t = ", t)
+        print(" ")
 
-        File("problem/u_solution.pvd") << (u, t) 
-        File("problem/s_solution.pvd") << (s_0, t)
+        vtkfiles << (s_0, t)
+        vtkfileu << (u, t)
 
         # Update time
         t += float(dt)
