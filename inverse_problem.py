@@ -290,7 +290,7 @@ def solve_pdes_after(ctrls):
         print(" ")
 
         vtkfiles << (s_0, t)
-        vtkfileu << (u, t)
+        vtkfileu << (us, t)
 
         # Update time
         t += float(dt)
