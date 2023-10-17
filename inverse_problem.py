@@ -178,7 +178,6 @@ def solve_pdes(ctrls):
 
         # Solve PDEs
         solve(a == L, s_0, bcs = bc)
-        
         solve(R_fwd == 0, u, bcs = bcs)
 
         j += 0.5*float(dt)*assemble((u - u_star)**2*dx)
