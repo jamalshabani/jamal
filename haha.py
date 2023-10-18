@@ -19,10 +19,6 @@ options = parse()
 
 from fenics import *
 from fenics_adjoint import *
-from collections import OrderedDict
-
-# Next, we define the expressions for observational data :math:`d` and the
-# viscosity :math:`\nu`.
 
 # Import gmesh
 xml_mesh = "mesh/leastsquare.xml"
