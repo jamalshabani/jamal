@@ -132,7 +132,7 @@ T = 2
 # The following function implements a heat equation solver in FEniCS,
 # and constructs the first functional term.
 
-def solve_pdes(ctrls):
+def solve_pdes():
     s = TrialFunction(V)
     w = TestFunction(V)
 
@@ -177,7 +177,7 @@ def solve_pdes(ctrls):
 
     return j
 
-j = solve_pdes(ctrls)
+j = solve_pdes()
 
 
 # We add the regularisation term to the first functional term and define define the controls:
