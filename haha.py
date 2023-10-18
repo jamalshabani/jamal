@@ -163,7 +163,7 @@ def solve_pdes():
     t = float(dt)
     u_star = Constant((0.0, 1.0))
 
-    j = 0.5*float(dt)*assemble((u - u_star)**2*dx(4))
+    j = 0.5*float(dt)*assemble(inner(u - u_star, u - u_star)*dx(4))
 
     while t <= T:
         
@@ -171,7 +171,7 @@ def solve_pdes():
         solve(a == L, s_0, bcs = bcss)
         solve(R_fwd == 0, u, bcs = bcs)
 
-        j += 0.5*float(dt)*assemble((u - u_star)**2*dx(4))
+        j += 0.5*float(dt)*assemble(inner(u - u_star, u - u_star)*dx(4))
         
         # Update time
         t += float(dt)
@@ -200,6 +200,7 @@ J = j + assemble(Pg) + assemble(P)
 ms = Control(rhos)
 mr = Control(rhor)
 gg = Control(g)
+
 
 # Finally, we define the reduced functional and solve the optimisation problem:
 
