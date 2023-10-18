@@ -126,6 +126,10 @@ def sigma_s(u, Id):
 def sigma_r(u, Id):
     return lambda_r * tr(epsilon(u)) * Id + 2 * mu_r * epsilon(u)
 
+# The left side of the beam is clamped
+bcs = DirichletBC(VV, Constant((0, 0)), boundaries, 7)
+bcss = DirichletBC(V, Constant(0.0), boundaries, 7)
+
 dt = Constant(0.1)
 T = 1
 
@@ -147,9 +151,6 @@ def solve_pdes():
     a, L = lhs(F), rhs(F)
     # The left side of the beam is clamped
 
-    bcs = DirichletBC(VV, Constant((0, 0)), boundaries, 7)
-    bc = DirichletBC(V, Constant(0.0), boundaries, 7)
-
     # Define the weak form for forward PDE
     a_forward_v = h_v(rhos, rhor) * inner(sigma_v(u, Id), epsilon(v)) * dx
     a_forward_s = h_s(rhos) * inner(sigma_s(u, Id), epsilon(v)) * dx
@@ -167,7 +168,7 @@ def solve_pdes():
     while t <= T:
         
         # Solve PDEs
-        solve(a == L, s_0, bcs = bc)
+        solve(a == L, s_0, bcs = bcss)
         solve(R_fwd == 0, u, bcs = bcs)
 
         j += 0.5*float(dt)*assemble((u - u_star)**2*dx(4))
@@ -229,13 +230,13 @@ rhor_final.assign(opt_rhor)
 rho_final.assign(opt_rhor - opt_rhos)
 g_final.assign(opt_g)
 
-File("problem/rho-final.pvd").write(rho_final)
-File("problem/rhos-final.pvd").write(rhos_final)
-File("problem/rhor-final.pvd").write(rhor_final)
-File("problem/g-final.pvd").write(g_final)
+File(options.output + "/rho-final.pvd").write(rho_final)
+File(options.output + "/rhos-final.pvd").write(rhos_final)
+File(options.output + "/rhor-final.pvd").write(rhor_final)
+File(options.output + "/g-final.pvd").write(g_final)
 
-vtkfiles = File("problem/ssolution.pvd")
-vtkfileu = File("problem/usolution.pvd")
+vtkfiles = File(options.output + "/ssolution.pvd")
+vtkfileu = File(options.output + "/usolution.pvd")
 
 def solve_pdes_after():
     s = TrialFunction(V)
@@ -248,10 +249,6 @@ def solve_pdes_after():
 
     F = ( (s - s_0)/dt*w + nu*inner(grad(s), grad(w)) - g*w)*dx
     a, L = lhs(F), rhs(F)
-    # The left side of the beam is clamped
-
-    bcs = DirichletBC(VV, Constant((0, 0)), boundaries, 7)
-    bc = DirichletBC(V, Constant(0.0), boundaries, 7)
 
     # Define the weak form for forward PDE
     a_forward_v = h_v(opt_rhos, opt_rhor) * inner(sigma_v(us, Id), epsilon(v)) * dx
@@ -269,7 +266,7 @@ def solve_pdes_after():
         g.assign(opt_g)
 
         # Solve PDEs
-        solve(a == L, s_0, bcs = bc)
+        solve(a == L, s_0, bcs = bcss)
         solve(R_fwd == 0, us, bcs = bcs)
 
         print(" ")
