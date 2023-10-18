@@ -210,15 +210,15 @@ problem = MinimizationProblem(Jhat, bounds = boxconstraints, constraints = [volu
 
 parameters = {"acceptable_tol": 1.0e-5, "maximum_iterations": options.maxit}
 solver = IPOPTSolver(problem, parameters = parameters)
-opt_ctrls = solver.solve()
+opt_rhos, opt_rhor, opt_g = solver.solve()
 
 rho_final = Function(V, name = "Material density")
 rhos_final = Function(V, name = "Structural material")
 rhor_final = Function(V, name = "Responsive material")
 
-rhos_final.assign(opt_ctrls[-2])
-rhor_final.assign(opt_ctrls[-1])
-rho_final.assign(opt_ctrls[-1] - opt_ctrls[-2])
+rhos_final.assign(opt_rhos)
+rhor_final.assign(opt_rhor)
+rho_final.assign(opt_rhor - opt_rhos)
 
 File("problem/rho-final.pvd").write(rho_final)
 File("problem/rhos-final.pvd").write(rhos_final)
@@ -246,19 +246,19 @@ def solve_pdes_after(ctrls):
     bc = DirichletBC(V, Constant(0.0), "on_boundary")
 
     # Define the weak form for forward PDE
-    a_forward_v = h_v(opt_ctrls[-2], opt_ctrls[-1]) * inner(sigma_v(us, Id), epsilon(v)) * dx
-    a_forward_s = h_s(opt_ctrls[-2]) * inner(sigma_s(us, Id), epsilon(v)) * dx
-    a_forward_r = h_r(opt_ctrls[-1]) * inner(sigma_r(us, Id), epsilon(v)) * dx
+    a_forward_v = h_v(opt_rhos, opt_rhor) * inner(sigma_v(us, Id), epsilon(v)) * dx
+    a_forward_s = h_s(opt_rhos) * inner(sigma_s(us, Id), epsilon(v)) * dx
+    a_forward_r = h_r(opt_rhor) * inner(sigma_r(us, Id), epsilon(v)) * dx
     a_forward = a_forward_v + a_forward_s + a_forward_r
 
-    L_forward = s_0 * h_r(opt_ctrls[-1]) * inner(sigma_A(Id, Id), epsilon(v)) * dx
+    L_forward = s_0 * h_r(opt_rhor) * inner(sigma_A(Id, Id), epsilon(v)) * dx
     R_fwd = a_forward - L_forward
 
     t = float(dt)
 
     while t <= T:
         # Update source term from control array
-        g.assign(ctrls[int(t*10)])
+        g.assign(opt_g)
 
         # Solve PDEs
         solve(a == L, s_0, bcs = bc)
