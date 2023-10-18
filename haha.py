@@ -173,9 +173,9 @@ def solve_pdes(ctrls):
         # Update time
         t += float(dt)
 
-    return s_0, u, j
+    return j
 
-u, d, j = solve_pdes(ctrls)
+j = solve_pdes(ctrls)
 
 alpha = Constant(1e-1)
 regularisation = alpha/2*sum([1/dt*(gb - ga)**2*dx for gb, ga in
