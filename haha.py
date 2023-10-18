@@ -43,6 +43,7 @@ rhor = Function(V, name = "Responsive material")  # Responsive material 2(Red)
 # Create initial design
 rhos.interpolate(Constant(options.volume_s))
 rhor.interpolate(Constant(options.volume_r))
+g.interpolate(Constant(options.heatsource))
 ###### End Initial Design #####
 
 # Define the constants and parameters used in the problem
@@ -54,7 +55,7 @@ kappa_m_e = Constant(kappa * epsilon)
 
 # Define the boundary/traction force
 f = Constant((0.0, -1.0))
-#u_star = Constant((0.0, t))
+u_star = Constant((0.0, 1.0))
 
 # Young's modulus of the beam and poisson ratio
 E_v = Constant(delta)
@@ -124,13 +125,7 @@ def sigma_r(u, Id):
     return lambda_r * tr(epsilon(u)) * Id + 2 * mu_r * epsilon(u)
 
 dt = Constant(0.1)
-T = 1
-
-ctrls = OrderedDict()
-t = float(dt)
-while t <= T:
-    ctrls[t] = Function(V)
-    t += float(dt)
+T = 2
 
 # The following function implements a heat equation solver in FEniCS,
 # and constructs the first functional term.
@@ -163,15 +158,12 @@ def solve_pdes(ctrls):
     R_fwd = a_forward - L_forward
 
     t = float(dt)
-    u_star = Constant((0.0, 0.0))
+    u_star = Constant((0.0, 1.0))
 
     j = 0.5*float(dt)*assemble((u - u_star)**2*dx)
 
     while t <= T:
-        # Update source term from control array
-        g.assign(ctrls[t])
-        u_star = Constant((0.0, t))
-
+        
         # Solve PDEs
         solve(a == L, s_0, bcs = bc)
         solve(R_fwd == 0, u, bcs = bcs)
