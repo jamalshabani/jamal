@@ -11,6 +11,7 @@ def parse():
     parser.add_argument('-er', '--ermodulus', type = float, default = 1.0e-1, help = 'Elastic Modulus for responsive material')
     parser.add_argument('-p', '--power_p', type = float, default = 2.0, help = 'Power for elasticity interpolation')
     parser.add_argument('-q', '--power_q', type = float, default = 2.0, help = 'Power for multiple-well function')
+    parser.add_argument('-g', '--heatsource', type = float, default = 0.5, help = 'Heat source')
 
     options = parser.parse_args()
     return options
@@ -39,6 +40,7 @@ VV = VectorFunctionSpace(mesh, "CG", 1)
 rhoi = Function(V, name = "Materual density")
 rhos = Function(V, name = "Structural material")  # Structural material 1(Blue)
 rhor = Function(V, name = "Responsive material")  # Responsive material 2(Red)
+g = Function(V, name = "Heat source")
 
 # Create initial design
 rhos.interpolate(Constant(options.volume_s))
@@ -234,8 +236,6 @@ def solve_pdes_after(ctrls):
     # Define test function and beam displacement
     v = TestFunction(VV)
     us = Function(VV, name = "Displacement")
-
-    g = Function(V, name="source")
     s_0 = Function(V, name="solution")
 
     F = ( (s - s_0)/dt*w + nu*inner(grad(s), grad(w)) - g*w)*dx
