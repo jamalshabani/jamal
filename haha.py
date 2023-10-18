@@ -246,9 +246,9 @@ def solve_pdes_after():
     # Define test function and beam displacement
     v = TestFunction(VV)
     us = Function(VV, name = "Displacement")
-    s_0 = Function(V, name="solution")
+    ss = Function(V, name="solution")
 
-    F = ( (s - s_0)/dt*w + nu*inner(grad(s), grad(w)) - g*w)*dx
+    F = ( (s - ss)/dt*w + nu*inner(grad(s), grad(w)) - g*w)*dx
     a, L = lhs(F), rhs(F)
 
     # Define the weak form for forward PDE
@@ -257,7 +257,7 @@ def solve_pdes_after():
     a_forward_r = h_r(opt_rhor) * inner(sigma_r(us, Id), epsilon(v)) * dx
     a_forward = a_forward_v + a_forward_s + a_forward_r
 
-    L_forward = s_0 * h_r(opt_rhor) * inner(sigma_A(Id, Id), epsilon(v)) * dx
+    L_forward = ss * h_r(opt_rhor) * inner(sigma_A(Id, Id), epsilon(v)) * dx
     R_fwd = a_forward - L_forward
 
     t = float(dt)
@@ -267,7 +267,7 @@ def solve_pdes_after():
         g.assign(opt_g)
 
         # Solve PDEs
-        solve(a == L, s_0, bcs = bcss)
+        solve(a == L, ss, bcs = bcss)
         solve(R_fwd == 0, us, bcs = bcs)
 
         print(" ")
