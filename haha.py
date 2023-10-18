@@ -127,7 +127,7 @@ def sigma_r(u, Id):
     return lambda_r * tr(epsilon(u)) * Id + 2 * mu_r * epsilon(u)
 
 dt = Constant(0.1)
-T = 2
+T = 1
 
 # The following function implements a heat equation solver in FEniCS,
 # and constructs the first functional term.
@@ -148,7 +148,7 @@ def solve_pdes():
     # The left side of the beam is clamped
 
     bcs = DirichletBC(VV, Constant((0, 0)), boundaries, 7)
-    bc = DirichletBC(V, Constant(0.0), "on_boundary")
+    bc = DirichletBC(V, Constant(0.0), boundaries, 7)
 
     # Define the weak form for forward PDE
     a_forward_v = h_v(rhos, rhor) * inner(sigma_v(u, Id), epsilon(v)) * dx
@@ -190,7 +190,12 @@ func2_sub3 = inner(grad(v_r(rhor)), grad(v_r(rhor))) * dx
 func2 = kappa_m_e * (func2_sub1 + func2_sub2 + func2_sub3)
 P = func1 + func2
 
-J = j + assemble(regularisation) + assemble(P)
+# Define the Modica-Mortola functional for "g"
+func1g = kappa_d_e * W(g) * dx
+func2g = kappa_m_e * inner(grad(g), grad(g)) * dx
+Pg = func1g + func2g
+
+J = j + assemble(Pg) + assemble(P)
 ms = Control(rhos)
 mr = Control(rhor)
 gg = Control(g)
@@ -229,7 +234,7 @@ File("problem/rhor-final.pvd").write(rhor_final)
 vtkfiles = File("problem/ssolution.pvd")
 vtkfileu = File("problem/usolution.pvd")
 
-def solve_pdes_after(ctrls):
+def solve_pdes_after():
     s = TrialFunction(V)
     w = TestFunction(V)
 
@@ -275,7 +280,7 @@ def solve_pdes_after(ctrls):
         # Update time
         t += float(dt)
 
-solve_pdes_after(opt_ctrls)
+solve_pdes_after()
 
 #opt_ctrls = minimize(rf, options={"maxiter": 50})
 
