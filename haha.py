@@ -177,9 +177,6 @@ def solve_pdes(ctrls):
 
 j = solve_pdes(ctrls)
 
-alpha = Constant(1e-1)
-regularisation = alpha/2*sum([1/dt*(gb - ga)**2*dx for gb, ga in
-    zip(list(ctrls.values())[1:], list(ctrls.values())[:-1])])
 
 # We add the regularisation term to the first functional term and define define the controls:
 # Define the Modica-Mortola functional
@@ -194,23 +191,20 @@ P = func1 + func2
 J = j + assemble(regularisation) + assemble(P)
 ms = Control(rhos)
 mr = Control(rhor)
-m = [Control(c) for c in ctrls.values()]
-m.append(ms)
-m.append(mr)
+gg = Control(g)
 
 # Finally, we define the reduced functional and solve the optimisation problem:
 
-Jhat = ReducedFunctional(J, m)
+Jhat = ReducedFunctional(J, [ms, mr, gg])
 
 # Define box contraints
 lm = 0.0
 um = 1.0
 
-boxconstraints = [(lm, um) for i in range(len(m))]
-print(len(boxconstraints))
+boxconstraints = [(lm, um), (lm, um), (lm, um)]
 
-volumes_constraint = UFLInequalityConstraint((options.volume_s - rhos)*dx, m)
-volumer_constraint = UFLInequalityConstraint((options.volume_r - rhor)*dx, m)
+volumes_constraint = UFLInequalityConstraint((options.volume_s - rhos)*dx, [ms, mr, gg])
+volumer_constraint = UFLInequalityConstraint((options.volume_r - rhor)*dx, [ms, mr, gg])
 
 problem = MinimizationProblem(Jhat, bounds = boxconstraints, constraints = [volumes_constraint, volumer_constraint])
 
