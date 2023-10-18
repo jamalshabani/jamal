@@ -162,7 +162,7 @@ def solve_pdes():
     t = float(dt)
     u_star = Constant((0.0, 1.0))
 
-    j = 0.5*float(dt)*assemble((u - u_star)**2*dx)
+    j = 0.5*float(dt)*assemble((u - u_star)**2*dx(4))
 
     while t <= T:
         
@@ -170,7 +170,7 @@ def solve_pdes():
         solve(a == L, s_0, bcs = bc)
         solve(R_fwd == 0, u, bcs = bcs)
 
-        j += 0.5*float(dt)*assemble((u - u_star)**2*dx)
+        j += 0.5*float(dt)*assemble((u - u_star)**2*dx(4))
         
         # Update time
         t += float(dt)
@@ -222,14 +222,17 @@ opt_rhos, opt_rhor, opt_g = solver.solve()
 rho_final = Function(V, name = "Material density")
 rhos_final = Function(V, name = "Structural material")
 rhor_final = Function(V, name = "Responsive material")
+g_final = Function(V, name = "Final heat source")
 
 rhos_final.assign(opt_rhos)
 rhor_final.assign(opt_rhor)
 rho_final.assign(opt_rhor - opt_rhos)
+g_final.assign(opt_g)
 
 File("problem/rho-final.pvd").write(rho_final)
 File("problem/rhos-final.pvd").write(rhos_final)
 File("problem/rhor-final.pvd").write(rhor_final)
+File("problem/g-final.pvd").write(g_final)
 
 vtkfiles = File("problem/ssolution.pvd")
 vtkfileu = File("problem/usolution.pvd")
@@ -248,7 +251,7 @@ def solve_pdes_after():
     # The left side of the beam is clamped
 
     bcs = DirichletBC(VV, Constant((0, 0)), boundaries, 7)
-    bc = DirichletBC(V, Constant(0.0), "on_boundary")
+    bc = DirichletBC(V, Constant(0.0), boundaries, 7)
 
     # Define the weak form for forward PDE
     a_forward_v = h_v(opt_rhos, opt_rhor) * inner(sigma_v(us, Id), epsilon(v)) * dx
