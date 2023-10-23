@@ -1,5 +1,4 @@
 from firedrake import *
-import time
 
 T = 2.0            # final time
 num_steps = 50     # number of time steps
