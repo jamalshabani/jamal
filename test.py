@@ -8,29 +8,23 @@ dt = T / num_steps # time step size
 # Create mesh and define function space
 nx = ny = 30
 mesh = UnitSquareMesh(nx, ny)
-V = FunctionSpace(mesh, 'P', 1)
+V = FunctionSpace(mesh, 'CG', 1)
 
 # Define boundary condition
-def boundary(x, on_boundary):
-    return on_boundary
-
-bc = DirichletBC(V, Constant(0), boundary)
+bc = DirichletBC(V, Constant(0), [1,2,3,4])
 
 # Define initial value
-u_0 = Expression('exp(-a*pow(x[0], 2) - a*pow(x[1], 2))',
-                 degree=2, a=5)
-u_n = interpolate(u_0, V)
+u_n = interpolate(Constant(1.0), V)
 
 # Define variational problem
-u = TrialFunction(V)
+u = Function(V)
 v = TestFunction(V)
-f = Constant(0)
+f = Constant(1.0)
 
-F = u*v*dx + dt*dot(grad(u), grad(v))*dx - (u_n + dt*f)*v*dx
-a, L = lhs(F), rhs(F)
+F = u*v*dx + dt*inner(grad(u), grad(v))*dx - (u_n + dt*f)*v*dx
 
 # Create VTK file for saving solution
-vtkfile = File('heat_gaussian/solution.pvd')
+vtkfile = File('test/solution.pvd')
 
 # Time-stepping
 u = Function(V)
@@ -41,11 +35,10 @@ for n in range(num_steps):
     t += dt
 
     # Compute solution
-    solve(a == L, u, bc)
+    solve(F == 0, u, bcs = bc)
 
     # Save to file and plot solution
     vtkfile << (u, t)
-    plot(u)
 
     # Update previous solution
     u_n.assign(u)
