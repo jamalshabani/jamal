@@ -18,15 +18,15 @@ u_n = interpolate(Constant(1.0), V)
 # Define variational problem
 u = Function(V)
 v = TestFunction(V)
-f = Constant(1.0)
+g = interpolate(Constant(1.0), V)
 
-F = u*v*dx + dt*inner(grad(u), grad(v))*dx - (u_n + dt*f)*v*dx
-
+F = (u - u_n)/dt*v*dx + inner(grad(u), grad(v))*dx - g*v*dx
+# cF = u*v*dx + dt*inner(grad(u), grad(v))*dx - (u_n+dt*g)*v*dx
 # Create VTK file for saving solution
 vtkfile = File('test/solution.pvd')
 
 # Time-stepping
-u = Function(V)
+# u = Function(V)
 t = 0
 for n in range(num_steps):
 
@@ -37,7 +37,7 @@ for n in range(num_steps):
     solve(F == 0, u, bcs = bc)
 
     # Save to file and plot solution
-    vtkfile << (u, t)
+    vtkfile.write(u, time = t)
 
     # Update previous solution
     u_n.assign(u)
