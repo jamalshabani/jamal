@@ -20,13 +20,12 @@ u = Function(V)
 v = TestFunction(V)
 g = interpolate(Constant(1.0), V)
 
-F = (u - u_n)/dt*v*dx + inner(grad(u), grad(v))*dx - g*v*dx
-# cF = u*v*dx + dt*inner(grad(u), grad(v))*dx - (u_n+dt*g)*v*dx
+#F = (u - u_n)/dt*v*dx + inner(grad(u), grad(v))*dx - g*v*dx
+F = u*v*dx + dt*inner(grad(u), grad(v))*dx - (u_n+dt*g)*v*dx
 # Create VTK file for saving solution
-vtkfile = File('test/solution.pvd')
+vtkfile = File('test1/solution.pvd')
 
 # Time-stepping
-# u = Function(V)
 t = 0
 for n in range(num_steps):
 
