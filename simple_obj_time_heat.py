@@ -177,6 +177,10 @@ q = Function(V, name = "Adjoint variable heat")
 bcs = DirichletBC(VV, Constant((0, 0)), 7)
 bcss = DirichletBC(V, Constant(0), 7)
 
+T = 1.0            # Final time
+num_steps = 10     # Number of time steps
+dt = T / num_steps # Time step size
+
 # Define the objective function
 J = 0.5 * inner(u - u_star, u - u_star) * dx(4)
 
@@ -201,10 +205,10 @@ func8 = pow(v_s(rho), 2) * pow(g(rho), 2) * dx
 JJ = J + P + PP +  func5 + func6 + func7 + func8
 
 # Define weak form for the heat conduction
-#Solve for "s"
-a_heat_forward = k(rho) * inner(grad(s), grad(w)) * dx
-L_heat_forward = inner(g(rho), w) * dx
-R_heat_forward = a_heat_forward - L_heat_forward
+# Solve for "s"
+# Define initial value for stimulus
+s_n = interpolate(Constant(0.0), V)
+F = s * w * dx + dt * inner(grad(s), grad(w)) * dx - (s_n + dt * g(rho)) * w * dx
 
 # Define adjoint weak form for the heat conduction
 # Solve for "q"
@@ -248,7 +252,7 @@ a_heat_lagrange = k(rho) * inner(grad(s), grad(q)) * dx
 L_heat_lagrange = inner(g(rho), q) * dx
 R_heat_lagrange = a_heat_lagrange - L_heat_lagrange
 
-L = JJ - R_lagrange - R_heat_lagrange
+L = JJ - R_lagrange
 
 
 # Beam .pvd file for saving designs
