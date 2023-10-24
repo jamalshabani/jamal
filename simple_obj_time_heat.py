@@ -208,7 +208,7 @@ JJ = J + P + PP +  func5 + func6 + func7 + func8
 # Solve for "s"
 # Define initial value for stimulus
 s_n = interpolate(Constant(0.0), V)
-F = s * w * dx + dt * inner(grad(s), grad(w)) * dx - (s_n + dt * g(rho)) * w * dx
+R_heat_forward = s * w * dx + dt * inner(grad(s), grad(w)) * dx - (s_n + dt * g(rho)) * w * dx
 
 # Define adjoint weak form for the heat conduction
 # Solve for "q"
@@ -293,36 +293,42 @@ def FormObjectiveGradient(tao, x, G):
 	print(" ")
 
 	i = tao.getIterationNumber()
-	if (i%5) == 0:
-		rho_i.interpolate(rho.sub(1) - rho.sub(0))
-		stimulus.interpolate(s)
-		rho_str.interpolate(rho.sub(0))
-		rho_res.interpolate(rho.sub(1))
-		rho_g.interpolate(rho.sub(2))
-		solve(R_fwd_s == 0, u, bcs = bcs)
-		beam.write(rho_i, stimulus, rho_str, rho_res, rho_g, u, time = i)
+	t = 0
+	
+	for n in range(num_steps):
 
-	with rho.dat.vec as rho_vec:
-		rho_vec.set(0.0)
-		rho_vec.axpy(1.0, x)
+		# Update time
+		t += dt
+		if (i%5) == 0:
+			rho_i.interpolate(rho.sub(1) - rho.sub(0))
+			stimulus.interpolate(s)
+			rho_str.interpolate(rho.sub(0))
+			rho_res.interpolate(rho.sub(1))
+			rho_g.interpolate(rho.sub(2))
+			solve(R_fwd_s == 0, u, bcs = bcs)
+			beam.write(rho_i, stimulus, rho_str, rho_res, rho_g, u, time = t)
 
-	# Step 1: Solve heat conduction
-	solve(R_heat_forward == 0, s, bcs = bcss)
+		with rho.dat.vec as rho_vec:
+			rho_vec.set(0.0)
+			rho_vec.axpy(1.0, x)
 
-	# Step 2: Solve forward PDE
-	solve(R_fwd == 0, u, bcs = bcs)
+		# Step 1: Solve heat conduction
+		solve(R_heat_forward == 0, s, bcs = bcss)
 
-	# Step 3: Solve adjoint PDE
-	solve(R_adj == 0, p, bcs = bcs)
+		# Step 2: Solve forward PDE
+		solve(R_fwd == 0, u, bcs = bcs)
 
-	# Step 4: Solve asjoint Heat
-	solve(R_heat_adjoint == 0, q, bcs = bcss)
+		# Step 3: Solve adjoint PDE
+		solve(R_adj == 0, p, bcs = bcs)
 
-	# Evaluate the objective function
-	# objective_value = assemble(J)
-	# print("The value of objective function is {}".format(objective_value))
+		# Step 4: Solve asjoint Heat
+		# solve(R_heat_adjoint == 0, q, bcs = bcss)
 
-	# Compute gradiet w.r.t rhos and rhor and s
+		# Evaluate the objective function
+		# objective_value = assemble(J)
+		# print("The value of objective function is {}".format(objective_value))
+
+		# Compute gradiet w.r.t rhos and rhor and s
 	dJdrhos.interpolate(assemble(derivative(L, rho.sub(0))))
 	dJdrhos.interpolate(Constant(0.0), mesh.measure_set("cell", 4))
 
