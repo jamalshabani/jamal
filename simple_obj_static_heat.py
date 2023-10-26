@@ -318,7 +318,7 @@ def FormObjectiveGradient(tao, x, G):
 	# objective_value = assemble(J)
 	# print("The value of objective function is {}".format(objective_value))
 
-	# Compute gradiet w.r.t rhos and rhor and s
+	# Compute gradiet w.r.t rhos and rhor and g
 	dJdrhos.interpolate(assemble(derivative(L, rho.sub(0))))
 	dJdrhos.interpolate(Constant(0.0), mesh.measure_set("cell", 4))
 
