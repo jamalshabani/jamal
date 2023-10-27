@@ -305,7 +305,7 @@ def FormObjectiveGradient(tao, x, G):
 	i = tao.getIterationNumber()
 	t = 0
 
-	if (i > 0 and i % 5) == 0:
+	if (i % 5) == 0:
 		rho_i.interpolate(rho.sub(1) - rho.sub(0))
 		stimulus.interpolate(s)
 		rho_str.interpolate(rho.sub(0))
