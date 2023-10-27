@@ -264,6 +264,7 @@ L = JJ - R_lagrange - R_heat_lagrange
 
 # Beam .pvd file for saving designs
 beam = File(options.output + '/beam.pvd')
+vtkfile = File(options.output + '/solution.pvd')
 
 dJdrhos = Function(V, name = "Gradient s")
 dJdrhor = Function(V, name = "Gradient r")
@@ -311,7 +312,7 @@ def FormObjectiveGradient(tao, x, G):
 		rho_str.interpolate(rho.sub(0))
 		rho_res.interpolate(rho.sub(1))
 		rho_g.interpolate(rho.sub(2))
-		solve(R_fwd_s == 0, u, bcs = bcs)
+		beam.write(rho_i, rho_str, rho_res, rho_g)
 
 		for n in range(num_steps):
 			t += dt
@@ -320,7 +321,7 @@ def FormObjectiveGradient(tao, x, G):
 
 			# Step 2: Solve forward PDE
 			solve(R_fwd_s == 0, u, bcs = bcs)
-			beam.write(rho_i, stimulus, rho_str, rho_res, rho_g, u, time = t)
+			vtkfile.write(s, u, time = t)
 	
 	for n in range(num_steps):
 		# Update time
