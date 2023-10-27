@@ -1,7 +1,7 @@
 import subprocess
 
 program_list = ["rm -rf test1", "rm -rf test2", "rm -rf test3",
-                "python3 simple_obj_time_heat.py -tao_monitor -tao_max_it 100"]
+                "python3 simple_obj_time_heat.py -tao_monitor -tao_max_it 20"]
 
 
 i = 1
