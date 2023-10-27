@@ -207,11 +207,17 @@ JJ = J + P + PP +  func5 + func6 + func7 + func8
 # Define weak form for the heat conduction
 # Solve for "s"
 # Define initial value for stimulus
-s_n = interpolate(Constant(0.0), V)
-R_heat_forward = s * w * dx + dt * inner(grad(s), grad(w)) * dx - (s_n + dt * g(rho)) * w * dx
+s_0 = interpolate(Constant(0.0), V)
+R_heat_forward = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * g(rho)) * w * dx
 
 # Define adjoint weak form for the heat conduction
 # Solve for "q"
+# Define final value for stimulus
+q_n = interpolate(Constant(0.0), V)
+a_heat_adjoint = -(q - q_n)/dt * w * dx + k(rho) * inner(grad(q), grad(w)) * dx
+L_heat_adjoint = w * h_r(rho) * inner(Id, epsilon(p)) * dx
+R_heat_adjoint = a_heat_adjoint - L_heat_adjoint
+
 a_heat_adjoint = k(rho) * inner(grad(w), grad(q)) * dx
 L_heat_adjoint = w * h_r(rho) * inner(Id, epsilon(p)) * dx
 R_heat_adjoint = a_heat_adjoint - L_heat_adjoint
@@ -248,11 +254,12 @@ a_lagrange   = a_lagrange_v + a_lagrange_s + a_lagrange_r
 L_lagrange = inner(f, p) * ds(8) + h_r(rho) * inner(s*Id, epsilon(p)) * dx
 R_lagrange = a_lagrange - L_lagrange
 
+R_heat_lagrange = s * q * dx + dt * inner(grad(s), grad(q)) * dx - (s_0 + dt * g(rho)) * q * dx
 a_heat_lagrange = k(rho) * inner(grad(s), grad(q)) * dx
 L_heat_lagrange = inner(g(rho), q) * dx
 R_heat_lagrange = a_heat_lagrange - L_heat_lagrange
 
-L = JJ - R_lagrange
+L = JJ - R_lagrange - R_heat_lagrange
 
 
 # Beam .pvd file for saving designs
@@ -281,6 +288,9 @@ for i in range(N):
 	if (i%3) == 2:
 		indexg.append(i)
 
+u_array = np.empty([num_steps], dtype=object)
+s_array = np.empty([num_steps], dtype=object)
+
 def FormObjectiveGradient(tao, x, G):
 
 	# Print volume fraction of structural material
@@ -294,20 +304,35 @@ def FormObjectiveGradient(tao, x, G):
 
 	i = tao.getIterationNumber()
 	t = 0
-	
-	for n in range(num_steps):
-		print("haha")
 
-		# Update time
-		t += dt
-		if (i%5) == 0:
-			rho_i.interpolate(rho.sub(1) - rho.sub(0))
-			stimulus.interpolate(s)
-			rho_str.interpolate(rho.sub(0))
-			rho_res.interpolate(rho.sub(1))
-			rho_g.interpolate(rho.sub(2))
+	if (i%5) == 0:
+		rho_i.interpolate(rho.sub(1) - rho.sub(0))
+		stimulus.interpolate(s)
+		rho_str.interpolate(rho.sub(0))
+		rho_res.interpolate(rho.sub(1))
+		rho_g.interpolate(rho.sub(2))
+		solve(R_fwd_s == 0, u, bcs = bcs)
+
+		for n in range(num_steps):
+			t += dt
+			solve(R_heat_forward == 0, s, bcs = bcss)
+			s_0.assign(s)
+
+			# Step 2: Solve forward PDE
 			solve(R_fwd_s == 0, u, bcs = bcs)
 			beam.write(rho_i, stimulus, rho_str, rho_res, rho_g, u, time = t)
+	
+	for n in range(num_steps):
+		# Update time
+		t += dt
+		# if (i%5) == 0:
+		# 	rho_i.interpolate(rho.sub(1) - rho.sub(0))
+		# 	stimulus.interpolate(s)
+		# 	rho_str.interpolate(rho.sub(0))
+		# 	rho_res.interpolate(rho.sub(1))
+		# 	rho_g.interpolate(rho.sub(2))
+		# 	solve(R_fwd_s == 0, u, bcs = bcs)
+		# 	beam.write(rho_i, stimulus, rho_str, rho_res, rho_g, u)
 
 		with rho.dat.vec as rho_vec:
 			rho_vec.set(0.0)
@@ -315,6 +340,7 @@ def FormObjectiveGradient(tao, x, G):
 
 		# Step 1: Solve heat conduction
 		solve(R_heat_forward == 0, s, bcs = bcss)
+		s_0.assign(s)
 
 		# Step 2: Solve forward PDE
 		solve(R_fwd == 0, u, bcs = bcs)
@@ -323,20 +349,21 @@ def FormObjectiveGradient(tao, x, G):
 		solve(R_adj == 0, p, bcs = bcs)
 
 		# Step 4: Solve asjoint Heat
-		# solve(R_heat_adjoint == 0, q, bcs = bcss)
+		solve(R_heat_adjoint == 0, q, bcs = bcss)
+		q_n.assign(q)
 
 		# Evaluate the objective function
 		# objective_value = assemble(J)
 		# print("The value of objective function is {}".format(objective_value))
 
 	# Compute gradiet w.r.t rhos and rhor and s
-	dJdrhos.interpolate(assemble(derivative(L, rho.sub(0))).riesz_representation(riesz_map="l2"))
+	dJdrhos.interpolate(assemble(derivative(L, rho.sub(0))))
 	dJdrhos.interpolate(Constant(0.0), mesh.measure_set("cell", 4))
 
-	dJdrhor.interpolate(assemble(derivative(L, rho.sub(1))).riesz_representation(riesz_map="l2"))
+	dJdrhor.interpolate(assemble(derivative(L, rho.sub(1))))
 	dJdrhor.interpolate(Constant(0.0), mesh.measure_set("cell", 4))
 
-	dJdrhog.interpolate(assemble(derivative(L, rho.sub(2))).riesz_representation(riesz_map="l2"))
+	dJdrhog.interpolate(assemble(derivative(L, rho.sub(2))))
 
 	G.setValues(indexs, dJdrhos.vector().array())
 	G.setValues(indexr, dJdrhor.vector().array())
