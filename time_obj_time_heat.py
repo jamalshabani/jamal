@@ -294,9 +294,8 @@ for i in range(N):
 u_array = np.empty([num_steps], dtype=object)
 s_array = np.empty([num_steps], dtype=object)
 
-Obj = 0
-
 def FormObjectiveGradient(tao, x, G):
+	Obj = 0
 
 	# Print volume fraction of structural material
 	volume_s = assemble(v_s(rho) * dx)/omega

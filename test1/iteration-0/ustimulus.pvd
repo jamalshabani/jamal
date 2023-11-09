@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<VTKFile type="Collection" version="0.1" byte_order="LittleEndian">
+<Collection>
+<DataSet timestep="0.1" file="ustimulus_0.vtu" />
+<DataSet timestep="0.2" file="ustimulus_1.vtu" />
+<DataSet timestep="0.30000000000000004" file="ustimulus_2.vtu" />
+<DataSet timestep="0.4" file="ustimulus_3.vtu" />
+<DataSet timestep="0.5" file="ustimulus_4.vtu" />
+<DataSet timestep="0.6" file="ustimulus_5.vtu" />
+<DataSet timestep="0.7" file="ustimulus_6.vtu" />
+<DataSet timestep="0.7999999999999999" file="ustimulus_7.vtu" />
+<DataSet timestep="0.8999999999999999" file="ustimulus_8.vtu" />
+<DataSet timestep="0.9999999999999999" file="ustimulus_9.vtu" />
+</Collection>
+</VTKFile>
