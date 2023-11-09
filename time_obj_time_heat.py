@@ -12,7 +12,7 @@ def parse():
 	parser.add_argument('-tao_max_it', '--tao_max_it', type = int, default = 1000, help = 'Number of TAO iterations')
 	parser.add_argument('-vs', '--volume_s', type = float, default = 0.3, help = 'Volume percentage for structural material')
 	parser.add_argument('-vr', '--volume_r', type = float, default = 0.3, help = 'Volume percentage for responsive material')
-	parser.add_argument('-k', '--kappa', type = float, default = 2.5e-3, help = 'Weight of Modica-Mortola')
+	parser.add_argument('-k', '--kappa', type = float, default = 2.5e-2, help = 'Weight of Modica-Mortola')
 	parser.add_argument('-e', '--epsilon', type = float, default = 3.0e-2, help = 'Phase-field regularization parameter')
 	parser.add_argument('-o', '--output', type = str, default = 'test1', help = 'Output folder')
 	parser.add_argument('-m', '--mesh', type = str, default = 'trajectory.msh', help = 'Dimensions of meshed beam')
@@ -183,7 +183,7 @@ bcs = DirichletBC(VV, Constant((0, 0)), 7)
 bcss = DirichletBC(V, Constant(0), 7)
 
 T = 1.0            # Final time
-num_steps = 10     # Number of time steps
+num_steps = 20     # Number of time steps
 dt = T / num_steps # Time step size
 
 # Define the objective function
@@ -367,7 +367,7 @@ def FormObjectiveGradient(tao, x, G):
 		q_n.assign(q)
 
 		Obj = Obj + 0.5 * float(dt) * inner(u - u_star, u - u_star) * dx(4)
-		print(m, u_star)
+		# print(m, u_star)
 
 		# Evaluate the objective function
 		# objective_value = assemble(J)
