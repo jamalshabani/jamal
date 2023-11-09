@@ -9,6 +9,8 @@ nx = ny = 30
 mesh = UnitSquareMesh(nx, ny)
 V = FunctionSpace(mesh, 'CG', 1)
 
+print(list(range(11)))
+
 # Define boundary condition
 bc = DirichletBC(V, Constant(0), [1,2,3,4])
 

@@ -332,6 +332,7 @@ def FormObjectiveGradient(tao, x, G):
 	for n in range(num_steps):
 		# Update time
 		t += dt
+		m = n / 10 +  dt
 		# if (i%5) == 0:
 		# 	rho_i.interpolate(rho.sub(1) - rho.sub(0))
 		# 	stimulus.interpolate(s)
@@ -345,7 +346,8 @@ def FormObjectiveGradient(tao, x, G):
 			rho_vec.set(0.0)
 			rho_vec.axpy(1.0, x)
 
-		u_star = Constant((u_starx(t), u_stary(t)))
+		u_star = Constant((u_starx(m), u_stary(m)))
+
 
 		# Step 1: Solve heat conduction
 		solve(R_heat_forward == 0, s, bcs = bcss)
@@ -365,6 +367,7 @@ def FormObjectiveGradient(tao, x, G):
 		q_n.assign(q)
 
 		Obj = Obj + 0.5 * float(dt) * inner(u - u_star, u - u_star) * dx(4)
+		print(m, u_star)
 
 		# Evaluate the objective function
 		# objective_value = assemble(J)
