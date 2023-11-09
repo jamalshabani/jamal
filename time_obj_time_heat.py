@@ -207,7 +207,7 @@ func7 = pow(v_v(rho), 2) * pow(g(rho), 2) * dx
 func8 = pow(v_s(rho), 2) * pow(g(rho), 2) * dx
 
 # Objective function + Modica-Mortola functional + Volume penalties
-JJ = J + P + PP +  func5 + func6 + func7 + func8
+# JJ = J + P + PP +  func5 + func6 + func7 + func8
 
 # Define weak form for the heat conduction
 # Solve for "s"
@@ -264,7 +264,7 @@ a_heat_lagrange = k(rho) * inner(grad(s), grad(q)) * dx
 L_heat_lagrange = inner(g(rho), q) * dx
 R_heat_lagrange = a_heat_lagrange - L_heat_lagrange
 
-L = JJ - R_lagrange - R_heat_lagrange
+#L = JJ - R_lagrange - R_heat_lagrange
 
 
 # Beam .pvd file for saving designs
@@ -295,6 +295,8 @@ for i in range(N):
 
 u_array = np.empty([num_steps], dtype=object)
 s_array = np.empty([num_steps], dtype=object)
+
+Obj = 0
 
 def FormObjectiveGradient(tao, x, G):
 
@@ -346,6 +348,8 @@ def FormObjectiveGradient(tao, x, G):
 			rho_vec.set(0.0)
 			rho_vec.axpy(1.0, x)
 
+		u_star = Constant((u_starx(t), u_stary(t)))
+
 		# Step 1: Solve heat conduction
 		solve(R_heat_forward == 0, s, bcs = bcss)
 		s_0.assign(s)
@@ -360,9 +364,13 @@ def FormObjectiveGradient(tao, x, G):
 		solve(R_heat_adjoint == 0, q, bcs = bcss)
 		q_n.assign(q)
 
+		Obj = Obj + 0.5 * float(dt) * inner(u - u_star, u - u_star) * dx(4)
+
 		# Evaluate the objective function
 		# objective_value = assemble(J)
 		# print("The value of objective function is {}".format(objective_value))
+	JJ = Obj + P + PP +  func5 + func6 + func7 + func8
+	L = JJ - R_lagrange - R_heat_lagrange
 
 	# Compute gradiet w.r.t rhos and rhor and s
 	dJdrhos.interpolate(assemble(derivative(L, rho.sub(0))).riesz_representation(riesz_map="l2"))
