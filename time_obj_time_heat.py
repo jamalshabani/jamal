@@ -247,8 +247,6 @@ a_adjoint_s = h_s(rho) * inner(sigma_s(v, Id), epsilon(p)) * dx
 a_adjoint_r = h_r(rho) * inner(sigma_r(v, Id), epsilon(p)) * dx
 a_adjoint = a_adjoint_v + a_adjoint_s + a_adjoint_r
 
-L_adjoint = inner(u - u_star, v) * dx(4)
-R_adj = a_adjoint - L_adjoint
 
 # Define the Lagrangian
 a_lagrange_v = h_v(rho) * inner(sigma_v(u, Id), epsilon(p)) * dx
@@ -356,6 +354,9 @@ def FormObjectiveGradient(tao, x, G):
 
 		# Step 2: Solve forward PDE
 		solve(R_fwd == 0, u, bcs = bcs)
+
+		L_adjoint = inner(u - u_star, v) * dx(4)
+		R_adj = a_adjoint - L_adjoint
 
 		# Step 3: Solve adjoint PDE
 		solve(R_adj == 0, p, bcs = bcs)
