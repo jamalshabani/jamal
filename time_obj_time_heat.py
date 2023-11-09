@@ -187,7 +187,7 @@ num_steps = 10     # Number of time steps
 dt = T / num_steps # Time step size
 
 # Define the objective function
-J = 0.5 * inner(u - u_star, u - u_star) * dx(4)
+# J = 0.5 * inner(u - u_star, u - u_star) * dx(4)
 
 func1 = kappa_d_e * W(rho) * dx
 func2_sub1 = inner(grad(v_v(rho)), grad(v_v(rho))) * dx
