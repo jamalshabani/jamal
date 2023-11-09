@@ -5,8 +5,8 @@ def parse():
 	parser.add_argument('-tao_max_funcs', '--tao_max_funcs', type = int, default = 10000, help = 'TAO maximum functions evaluations')
 	parser.add_argument('-tao_monitor', '--tao_monitor', action = 'store_true', help = 'TAO monitor')
 	parser.add_argument('-tao_ls_monitor', '--tao_ls_monitor', action = 'store_true', help = 'TAO line search monitor')
-	parser.add_argument('-ls', '--lagrange_s', type = float, default = 0.05, help = 'Lagrange multiplier for structural material')
-	parser.add_argument('-lr', '--lagrange_r', type = float, default = 5.0, help = 'Lagrange multiplier for responsive material')
+	parser.add_argument('-ls', '--lagrange_s', type = float, default = 0.04, help = 'Lagrange multiplier for structural material')
+	parser.add_argument('-lr', '--lagrange_r', type = float, default = 4.5, help = 'Lagrange multiplier for responsive material')
 	parser.add_argument('-tao_ls_type', '--tao_ls_type', type = str, default = 'more-thuente', help = "TAO line search")
 	parser.add_argument('-tao_view', '--tao_view', action = 'store_true', help = "View convergence details")
 	parser.add_argument('-tao_max_it', '--tao_max_it', type = int, default = 1000, help = 'Number of TAO iterations')
@@ -128,8 +128,8 @@ def h_r(rho):
 
 # Define l(rho)
 def k(rho):
-    # return delta + (1 - delta) * (rho.sub(0) + rho.sub(1))
-    return 1
+    return delta + (1 - delta) * (rho.sub(0) + rho.sub(1))
+    # return 1
 
 
 def g(rho):
@@ -263,7 +263,7 @@ L = JJ - R_lagrange - R_heat_lagrange
 
 
 # Beam .pvd file for saving designs
-beam = File(options.output + '/beam.pvd')
+# beam = File(options.output + '/beam.pvd')
 
 dJdrhos = Function(V, name = "Gradient s")
 dJdrhor = Function(V, name = "Gradient r")
@@ -312,7 +312,8 @@ def FormObjectiveGradient(tao, x, G):
 		rho_res.interpolate(rho.sub(1))
 		rho_g.interpolate(rho.sub(2))
 
-		print("Saving files")
+		beam = File(options.output + '/iteration-{}/beam.pvd'.format(i))
+		vtkfile = File(options.output + '/iteration-{}/ustimulus.pvd'.format(i))
 
 		for n in range(num_steps):
 			t += dt
@@ -322,6 +323,7 @@ def FormObjectiveGradient(tao, x, G):
 			# Step 2: Solve forward PDE
 			solve(R_fwd_s == 0, u, bcs = bcs)
 			beam.write(rho_i, rho_str, rho_res, rho_g, s, u, time = t)
+			vtkfile.write(s, u, time = t)
 	
 	for n in range(num_steps):
 		# Update time
