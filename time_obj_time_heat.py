@@ -13,7 +13,7 @@ def parse():
 	parser.add_argument('-vs', '--volume_s', type = float, default = 0.3, help = 'Volume percentage for structural material')
 	parser.add_argument('-vr', '--volume_r', type = float, default = 0.3, help = 'Volume percentage for responsive material')
 	parser.add_argument('-k', '--kappa', type = float, default = 2.5e-4, help = 'Weight of Modica-Mortola')
-	parser.add_argument('-e', '--epsilon', type = float, default = 3.0e-2, help = 'Phase-field regularization parameter')
+	parser.add_argument('-e', '--epsilon', type = float, default = 3.0e-3, help = 'Phase-field regularization parameter')
 	parser.add_argument('-o', '--output', type = str, default = 'test1', help = 'Output folder')
 	parser.add_argument('-m', '--mesh', type = str, default = 'trajectory.msh', help = 'Dimensions of meshed beam')
 	parser.add_argument('-es', '--esmodulus', type = float, default = 1.0e-1, help = 'Elastic Modulus for structural material')

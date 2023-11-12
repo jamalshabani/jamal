@@ -8,6 +8,15 @@ dt = T / num_steps # time step size
 nx = ny = 30
 mesh = UnitSquareMesh(nx, ny)
 V = FunctionSpace(mesh, 'CG', 1)
+VV = VectorFunctionSpace(mesh, 'CG', 1, dim = 2)
+
+f = Function(VV)
+
+
+f = Constant((1,1))
+f = interpolate(f, VV)
+
+File("test1/f.pvd").write(f)
 
 print(list(range(11)))
 
