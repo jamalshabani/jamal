@@ -1,12 +1,16 @@
 from firedrake import *
+from petsc4py import PETSc
 
 T = 2.0            # final time
-num_steps = 50     # number of time steps
+num_steps = 10    # number of time steps
 dt = T / num_steps # time step size
 
 # Create mesh and define function space
-nx = ny = 30
-mesh = UnitSquareMesh(nx, ny)
+# Import gmesh
+mesh = Mesh(options.mesh)
+Id = Identity(mesh.geometric_dimension()) #Identity tensor
+
+# Define the function spaces
 V = FunctionSpace(mesh, 'CG', 1)
 VV = VectorFunctionSpace(mesh, 'CG', 1, dim = 2)
 

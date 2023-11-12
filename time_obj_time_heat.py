@@ -12,7 +12,7 @@ def parse():
 	parser.add_argument('-tao_max_it', '--tao_max_it', type = int, default = 1000, help = 'Number of TAO iterations')
 	parser.add_argument('-vs', '--volume_s', type = float, default = 0.3, help = 'Volume percentage for structural material')
 	parser.add_argument('-vr', '--volume_r', type = float, default = 0.3, help = 'Volume percentage for responsive material')
-	parser.add_argument('-k', '--kappa', type = float, default = 2.5e-4, help = 'Weight of Modica-Mortola')
+	parser.add_argument('-k', '--kappa', type = float, default = 2.5e-2, help = 'Weight of Modica-Mortola')
 	parser.add_argument('-e', '--epsilon', type = float, default = 3.0e-3, help = 'Phase-field regularization parameter')
 	parser.add_argument('-o', '--output', type = str, default = 'test1', help = 'Output folder')
 	parser.add_argument('-m', '--mesh', type = str, default = 'trajectory.msh', help = 'Dimensions of meshed beam')
@@ -323,6 +323,8 @@ def FormObjectiveGradient(tao, x, G):
 			t += dt
 			solve(R_heat_forward == 0, s, bcs = bcss)
 			s_0.assign(s)
+			s.assign(n * s)
+			# multiply stimulus by a factor
 
 			# Step 2: Solve forward PDE
 			solve(R_fwd_s == 0, u, bcs = bcs)
