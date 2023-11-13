@@ -69,6 +69,7 @@ rho = interpolate(rho, VVV)
 
 # Define the constant parameter used in the problem
 kappa = Constant(options.kappa)
+print(kappa)
 lagrange_r = Constant(options.lagrange_r)
 lagrange_s = Constant(options.lagrange_s)
 
