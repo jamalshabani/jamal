@@ -379,13 +379,13 @@ def FormObjectiveGradient(tao, x, G):
 	L = JJ - R_lagrange - R_heat_lagrange
 
 	# Compute gradiet w.r.t rhos and rhor and s
-	dJdrhos.interpolate(assemble(derivative(L, rho.sub(0))).riesz_representation(riesz_map="l2"))
+	dJdrhos.interpolate(10 * assemble(derivative(L, rho.sub(0))).riesz_representation(riesz_map="l2"))
 	dJdrhos.interpolate(Constant(0.0), mesh.measure_set("cell", 4))
 
-	dJdrhor.interpolate(assemble(derivative(L, rho.sub(1))).riesz_representation(riesz_map="l2"))
+	dJdrhor.interpolate(10 *  assemble(derivative(L, rho.sub(1))).riesz_representation(riesz_map="l2"))
 	dJdrhor.interpolate(Constant(0.0), mesh.measure_set("cell", 4))
 
-	dJdrhog.interpolate(assemble(derivative(L, rho.sub(2))).riesz_representation(riesz_map="l2"))
+	dJdrhog.interpolate(10 * assemble(derivative(L, rho.sub(2))).riesz_representation(riesz_map="l2"))
 
 	G.setValues(indexs, dJdrhos.vector().array())
 	G.setValues(indexr, dJdrhor.vector().array())
