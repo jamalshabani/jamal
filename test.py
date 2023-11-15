@@ -91,7 +91,7 @@ def u_starx(t):
 def u_stary(t):
      return sin(pi * t - pi/2) + 1
 
-f = Constant((0, -1.0))
+# f = Constant((0, -1.0))
 
 # Young's modulus of the beam and poisson ratio
 E_v = Constant(delta)
@@ -235,9 +235,7 @@ a_forward_s = h_s(rho) * inner(sigma_s(u, Id), epsilon(v)) * dx
 a_forward_r = h_r(rho) * inner(sigma_r(u, Id), epsilon(v)) * dx
 a_forward = a_forward_v + a_forward_s + a_forward_r
 
-L_forward = inner(f, v) * ds(8) + h_r(rho) * inner(s*Id, epsilon(v)) * dx
 L_forward_s = s * h_r(rho) * inner(Id, epsilon(v)) * dx
-R_fwd = a_forward - L_forward
 R_fwd_s = a_forward - L_forward_s
 
 
@@ -255,8 +253,6 @@ a_lagrange_s = h_s(rho) * inner(sigma_s(u, Id), epsilon(p)) * dx
 a_lagrange_r = h_r(rho) * inner(sigma_r(u, Id), epsilon(p)) * dx
 a_lagrange   = a_lagrange_v + a_lagrange_s + a_lagrange_r
 
-L_lagrange = inner(f, p) * ds(8) + h_r(rho) * inner(s*Id, epsilon(p)) * dx
-R_lagrange = a_lagrange - L_lagrange
 
 R_heat_lagrange = s * q * dx + dt * inner(grad(s), grad(q)) * dx - (s_0 + dt * g(rho)) * q * dx
 a_heat_lagrange = k(rho) * inner(grad(s), grad(q)) * dx
@@ -336,6 +332,18 @@ def FormObjectiveGradient(tao, x, G):
 		# Update time
 		t += dt
 		m = n / 10 +  dt
+
+		if (0 <= t <= 0.25):
+			u_star = Constant((0, 4 * t))
+			f = Constant((0, -1))
+		
+		if (0.25 <= t <= 0.5):
+			u_star = Constant((0, 3 - 8 * t))
+			f = Constant((0, 1))
+		
+		if (0.5 <= t <= 1):
+			u_star = Constant((0, 2 * t - 2))
+			f = Constant((0, -1))
 		# if (i%5) == 0:
 		# 	rho_i.interpolate(rho.sub(1) - rho.sub(0))
 		# 	stimulus.interpolate(s)
@@ -351,7 +359,6 @@ def FormObjectiveGradient(tao, x, G):
 
 		u_star = Constant((u_starx(m), u_stary(m)))
 
-
 		# Step 1: Solve heat conduction
 		solve(R_heat_forward == 0, s, bcs = bcss)
 		s_0.assign(s)
@@ -362,6 +369,12 @@ def FormObjectiveGradient(tao, x, G):
 		L_adjoint = inner(u - u_star, v) * dx(4)
 		R_adj = a_adjoint - L_adjoint
 
+		L_forward = inner(f, v) * ds(8) + h_r(rho) * inner(s*Id, epsilon(v)) * dx
+		R_fwd = a_forward - L_forward
+
+		L_lagrange = inner(f, p) * ds(8) + h_r(rho) * inner(s*Id, epsilon(p)) * dx
+		R_lagrange = a_lagrange - L_lagrange
+
 		# Step 3: Solve adjoint PDE
 		solve(R_adj == 0, p, bcs = bcs)
 
@@ -370,7 +383,7 @@ def FormObjectiveGradient(tao, x, G):
 		q_n.assign(q)
 
 		Obj = Obj + 0.5 * float(dt) * inner(u - u_star, u - u_star) * dx(4)
-		# print(m, u_star)
+		print(t, u_star)
 
 		# Evaluate the objective function
 		# objective_value = assemble(J)
