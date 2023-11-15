@@ -357,14 +357,7 @@ def FormObjectiveGradient(tao, x, G):
 			rho_vec.set(0.0)
 			rho_vec.axpy(1.0, x)
 
-		u_star = Constant((u_starx(m), u_stary(m)))
-
-		# Step 1: Solve heat conduction
-		solve(R_heat_forward == 0, s, bcs = bcss)
-		s_0.assign(s)
-
-		# Step 2: Solve forward PDE
-		solve(R_fwd == 0, u, bcs = bcs)
+		# u_star = Constant((u_starx(m), u_stary(m)))
 
 		L_adjoint = inner(u - u_star, v) * dx(4)
 		R_adj = a_adjoint - L_adjoint
@@ -374,6 +367,13 @@ def FormObjectiveGradient(tao, x, G):
 
 		L_lagrange = inner(f, p) * ds(8) + h_r(rho) * inner(s*Id, epsilon(p)) * dx
 		R_lagrange = a_lagrange - L_lagrange
+
+		# Step 1: Solve heat conduction
+		solve(R_heat_forward == 0, s, bcs = bcss)
+		s_0.assign(s)
+
+		# Step 2: Solve forward PDE
+		solve(R_fwd == 0, u, bcs = bcs)
 
 		# Step 3: Solve adjoint PDE
 		solve(R_adj == 0, p, bcs = bcs)
