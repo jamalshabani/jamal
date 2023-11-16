@@ -91,6 +91,16 @@ def u_starx(t):
 def u_stary(t):
      return sin(pi * t - pi/2) + 1
 
+def u_staryff(t):
+	if (0 <= t < 0.25):
+		return 4 * t, -1
+		
+	if (0.25 <= t < 0.75):
+		return 2 - 4 * t, 1
+		
+	if (0.75 <= t <= 1):
+		return 4 * t - 4, -1
+
 # f = Constant((0, -1.0))
 
 # Young's modulus of the beam and poisson ratio
@@ -305,6 +315,7 @@ def FormObjectiveGradient(tao, x, G):
 
 	i = tao.getIterationNumber()
 	t = 0
+	tt = 1
 
 	if (i % 5) == 0:
 		rho_i.interpolate(rho.sub(1) - rho.sub(0))
@@ -320,7 +331,16 @@ def FormObjectiveGradient(tao, x, G):
 			t += dt
 			solve(R_heat_forward == 0, s, bcs = bcss)
 			s_0.assign(s)
-			s.assign(n * s)
+			if (0 <= t < 0.25):
+				tt = 1
+		
+			if (0.25 <= t < 0.75):
+				tt = -1
+		
+			if (0.75 <= t <= 1):
+				tt = 1
+			s.assign(2 * sin(2 * pi * t) * s)
+
 			# multiply stimulus by a factor
 
 			# Step 2: Solve forward PDE
@@ -328,23 +348,14 @@ def FormObjectiveGradient(tao, x, G):
 			beam.write(rho_i, rho_str, rho_res, rho_g, s, u, time = t)
 			vtkfile.write(s, u, time = t)
 	
+	t = 0
 	for n in range(num_steps):
 		# Update time
-		t += dt
 		m = n / 10 +  dt
+		# print(t)
 
-		if (0 <= t <= 0.25):
-			u_star = Constant((0, 4 * t))
-			f = Constant((0, -1))
-		
-		if (0.25 <= t <= 0.5):
-			u_star = Constant((0, 3 - 8 * t))
-			f = Constant((0, 1))
-		
-		if (0.5 <= t <= 1):
-			u_star = Constant((0, 2 * t - 2))
-			f = Constant((0, -1))
 		# if (i%5) == 0:
+
 		# 	rho_i.interpolate(rho.sub(1) - rho.sub(0))
 		# 	stimulus.interpolate(s)
 		# 	rho_str.interpolate(rho.sub(0))
@@ -357,7 +368,14 @@ def FormObjectiveGradient(tao, x, G):
 			rho_vec.set(0.0)
 			rho_vec.axpy(1.0, x)
 
-		# u_star = Constant((u_starx(m), u_stary(m)))
+		u_stary, ff = u_staryff(t)
+
+		u_star = Constant((0, u_stary))
+
+		f = Constant((0, ff))
+
+		# print(t, u_star, f)
+
 
 		L_adjoint = inner(u - u_star, v) * dx(4)
 		R_adj = a_adjoint - L_adjoint
@@ -383,7 +401,8 @@ def FormObjectiveGradient(tao, x, G):
 		q_n.assign(q)
 
 		Obj = Obj + 0.5 * float(dt) * inner(u - u_star, u - u_star) * dx(4)
-		print(t, u_star)
+
+		t += dt
 
 		# Evaluate the objective function
 		# objective_value = assemble(J)
