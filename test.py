@@ -322,7 +322,7 @@ def FormObjectiveGradient(tao, x, G):
 		stimulus.interpolate(s)
 		rho_str.interpolate(rho.sub(0))
 		rho_res.interpolate(rho.sub(1))
-		rho_g.interpolate(rho.sub(2))
+		rho_g.interpolate(2 * sin(2 * pi * t) * rho.sub(2))
 
 		beam = File(options.output + '/iteration-{}/beam.pvd'.format(i))
 		vtkfile = File(options.output + '/iteration-{}/ustimulus.pvd'.format(i))
@@ -331,15 +331,7 @@ def FormObjectiveGradient(tao, x, G):
 			t += dt
 			solve(R_heat_forward == 0, s, bcs = bcss)
 			s_0.assign(s)
-			if (0 <= t < 0.25):
-				tt = 1
-		
-			if (0.25 <= t < 0.75):
-				tt = -1
-		
-			if (0.75 <= t <= 1):
-				tt = 1
-			s.assign(2 * sin(2 * pi * t) * s)
+			# s.assign(2 * sin(2 * pi * t) * s)
 
 			# multiply stimulus by a factor
 
