@@ -328,10 +328,12 @@ def FormObjectiveGradient(tao, x, G):
 
 		for n in range(num_steps):
 			t += dt
+			rho.sub(2).interpolate(2 * sin(2 * pi * t) * rho.sub(2))
+			rho_g.interpolate(rho.sub(2))
 			solve(R_heat_forward == 0, s, bcs = bcss)
 			s_0.assign(s)
 			# s.assign(2 * sin(2 * pi * t) * s)
-			rho_g.interpolate(2 * sin(2 * pi * t) * rho.sub(2))
+			
 
 			# multiply stimulus by a factor
 
