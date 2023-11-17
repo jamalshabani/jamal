@@ -224,7 +224,7 @@ func8 = pow(v_s(rho), 2) * pow(g(rho), 2) * dx
 # Solve for "s"
 # Define initial value for stimulus
 s_0 = interpolate(Constant(0.0), V)
-# R_heat_forward = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * g(rho)) * w * dx
+R_heat_forward = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * g(rho)) * w * dx
 
 # Define adjoint weak form for the heat conduction
 # Solve for "q"
@@ -331,8 +331,8 @@ def FormObjectiveGradient(tao, x, G):
 
 			rho_g.interpolate(2 * sin(2 * pi * t) * rho.sub(2))
 
-			R_heat_forward = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * rho_g) * w * dx
-			solve(R_heat_forward == 0, s, bcs = bcss)
+			R_heat_forward2 = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * rho_g) * w * dx
+			solve(R_heat_forward2 == 0, s, bcs = bcss)
 			s_0.assign(s)
 
 
