@@ -318,7 +318,7 @@ def FormObjectiveGradient(tao, x, G):
 		for n in range(num_steps):
 			t += dt
 			solve(R_heat_forward == 0, s, bcs = bcss)
-			s_0.assign(s)
+			s_0.assign(t * s)
 
 			# Step 2: Solve forward PDE
 			solve(R_fwd_s == 0, u, bcs = bcs)
