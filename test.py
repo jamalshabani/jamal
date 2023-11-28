@@ -315,7 +315,7 @@ def FormObjectiveGradient(tao, x, G):
 
 	i = tao.getIterationNumber()
 	t = 0
-	tt = 1
+	tt = 0
 
 	if (i % 5) == 0:
 		rho_i.interpolate(rho.sub(1) - rho.sub(0))
@@ -329,7 +329,10 @@ def FormObjectiveGradient(tao, x, G):
 		for n in range(num_steps):
 			t += dt
 
-			rho_g.interpolate(sin(2 * pi * t) * rho.sub(2))
+			rho_g.interpolate(sin(2 * pi * tt) * rho.sub(2))
+
+			print(tt)
+			tt += dt
 
 			R_heat_forward2 = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * rho_g) * w * dx
 			solve(R_heat_forward2 == 0, s, bcs = bcss)
