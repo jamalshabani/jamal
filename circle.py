@@ -86,10 +86,10 @@ kappa_m_ge = Constant(kappa * epsilon / 10)
 
 # Define the traction force and predescribed displacement
 def u_starx(t):
-     return cos(pi * t - pi/2)
+     return 2 * cos(pi * t - pi/2)
 
 def u_stary(t):
-     return sin(pi * t - pi/2) + 1
+     return 2 * sin(pi * t - pi/2) + 1
 
 def u_staryff(t):
 	if (0 <= t < 0.25):
