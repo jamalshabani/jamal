@@ -352,12 +352,12 @@ def FormObjectiveGradient(tao, x, G):
 			rho_vec.set(0.0)
 			rho_vec.axpy(1.0, x)
 
-		u_starx = u_starx(t)
-		u_stary = u_stary(t)
+		ux = u_starx(t)
+		uy = u_stary(t)
 
-		u_star = Constant((u_starx, u_stary))
+		u_star = Constant((ux, uy))
 
-		f = Constant((-1 * u_starx, -1 * u_stary))
+		f = Constant((-1 * ux, -1 * uy))
 
 		print(t, u_star, f)
 
