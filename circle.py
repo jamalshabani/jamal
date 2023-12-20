@@ -319,12 +319,12 @@ def FormObjectiveGradient(tao, x, G):
 		for n in range(num_steps):
 			t += dt
 
-			rho_g.interpolate(sin(2 * pi * t) * rho.sub(2))
+			# rho_g.interpolate(sin(2 * pi * t) * rho.sub(2))
+			rho_g.interpolate(rho.sub(2))
 
 			R_heat_forward2 = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * rho_g) * w * dx
 			solve(R_heat_forward2 == 0, s, bcs = bcss)
 			s_0.assign(s)
-
 
 			# Step 2: Solve forward PDE
 			solve(R_fwd_s == 0, u, bcs = bcs)
