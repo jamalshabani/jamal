@@ -359,8 +359,7 @@ def FormObjectiveGradient(tao, x, G):
 
 		f = Constant((-1 * ux, -1 * uy))
 
-		print(t, u_star, f)
-
+		# print(t, u_star, f)
 
 		L_adjoint = inner(u - u_star, v) * dx(4)
 		R_adj = a_adjoint - L_adjoint
