@@ -89,17 +89,7 @@ def u_starx(t):
      return 2 * cos(pi * t - pi/2)
 
 def u_stary(t):
-     return 2 * sin(pi * t - pi/2) + 1
-
-def u_staryff(t):
-	if (0 <= t < 0.25):
-		return 4 * t, -1
-		
-	if (0.25 <= t < 0.75):
-		return 2 - 4 * t, 1
-		
-	if (0.75 <= t <= 1):
-		return 4 * t - 4, -1
+     return 2 * sin(pi * t - pi/2) + 2
 
 # f = Constant((0, -1.0))
 
@@ -362,13 +352,14 @@ def FormObjectiveGradient(tao, x, G):
 			rho_vec.set(0.0)
 			rho_vec.axpy(1.0, x)
 
-		u_stary, ff = u_staryff(t)
+		u_starx = u_starx(t)
+		u_stary = u_stary(t)
 
-		u_star = Constant((0, u_stary))
+		u_star = Constant((u_starx, u_stary))
 
-		f = Constant((0, ff))
+		f = Constant((-1 * u_starx, -1 * u_stary))
 
-		# print(t, u_star, f)
+		print(t, u_star, f)
 
 
 		L_adjoint = inner(u - u_star, v) * dx(4)
