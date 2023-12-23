@@ -328,6 +328,10 @@ def FormObjectiveGradient(tao, x, G):
 
 			# Step 2: Solve forward PDE
 			solve(R_fwd_s == 0, u, bcs = bcs)
+			u_starhh = Constant((u.sub(0), u.sub(1)))
+			
+			u.interpolate(u_starhh)
+               
 			# ave_u.interpolate(assemble(u * dx(4)))
 			beam.write(rho_i, rho_str, rho_res, rho_g, s, u, time = t)
 			vtkfile.write(s, u, ave_u, time = t)
