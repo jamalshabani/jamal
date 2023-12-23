@@ -12,18 +12,14 @@ uuu = Function(VV, name = "Product")
 u_x = Function(V)
 u_y = Function(V)
 
+bcs = DirichletBC(VV, Constant((0, 0)), 7)
+
 t = 0
 vtk = File("haha/haha.pvd")
 for n in range(11):
      u_star = Constant((2*cos(pi * t - pi/2), 2*sin(pi * t - pi/2) + 1))
-     uu_star = Constant((8,6))
 
-     u.interpolate(u_star)
-     uu.interpolate(uu_star)
+     u.interpolate(u_star).apply(bcs)
 
-     uuu = inner(u,uu)
-     
-     print(type(uuu))
-
-     vtk.write(u, uu, time = t)
+     vtk.write(u, time = t)
      t = t + 0.1

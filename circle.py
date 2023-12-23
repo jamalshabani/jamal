@@ -95,13 +95,13 @@ def u_stary(t):
 
 def y_t(t):
 	if 0 <= t < 0.25:
-		return 1 - sqrt(4 - 16 * pow(t, 2))
+		return 1 - sqrt(1 - 16 * pow(t, 2))
 	if 0.25 <= t < 0.5:
-		return 1 + sqrt(4 - pow((2 - 4 * t), 2))
+		return 1 + sqrt(1 - pow((2 - 4 * t), 2))
 	if 0.5 <= t < 0.75:
-		return 1 + sqrt(4 - pow((2 - 4 * t), 2))
-	if 0.75 <= t <= 1:
-		return 1 - sqrt(4 - pow((4 - 4 * t), 2))
+		return 1 + sqrt(1 - pow((2 - 4 * t), 2))
+	if 0.75 <= t <= 1.5:
+		return 1 - sqrt(1 - pow((4 - 4 * t), 2))
 
 # Young's modulus of the beam and poisson ratio
 E_v = Constant(delta)
@@ -330,6 +330,8 @@ def FormObjectiveGradient(tao, x, G):
 			t += dt
 
 			# rho_g.interpolate(sin(2 * pi * t) * rho.sub(2))
+			# print(y_t(t), t)
+
 			rho_g.interpolate(y_t(t) * rho.sub(2))
 
 			R_heat_forward2 = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * rho_g) * w * dx
