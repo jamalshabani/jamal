@@ -1,4 +1,5 @@
 from firedrake import *
+import numpy as np
 
 # Import gmesh
 mesh = Mesh("trajectory.msh")
@@ -16,12 +17,24 @@ bcs = DirichletBC(VV, Constant((0, 0)), 7)
 
 t = 0
 vtk = File("haha/haha.pvd")
+
 for n in range(11):
-     u_star = Constant((2*cos(pi * t - pi/2), 2*sin(pi * t - pi/2) + 1))
+     u_star = Constant((cos(pi * t - pi/2), sin(pi * t - pi/2)))
      u.interpolate(u_star)
 
      uu_star = Constant((8, 6))
      uu.interpolate(uu_star)
 
-     vtk.write(u, uu, time = t)
+     u_array = u.vector().array().reshape(16068, 2)
+     uu_array = uu.vector().array().reshape(16068, 2)
+
+     uuu_array = u_array * uu_array
+     print(u_array)
+     print(uu_array)
+     print("Product = ", uuu_array)
+
+
+     uuu.vector()[:] = uuu_array
+
+     vtk.write(u, uu,uuu, time = t)
      t = t + 0.1
