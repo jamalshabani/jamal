@@ -19,7 +19,8 @@ vtk = File("haha/haha.pvd")
 for n in range(11):
      u_star = Constant((2*cos(pi * t - pi/2), 2*sin(pi * t - pi/2) + 1))
 
-     u.interpolate(u_star).apply(bcs)
+     u.interpolate(u_star)
+     bcs.apply(u)
 
      vtk.write(u, time = t)
      t = t + 0.1
