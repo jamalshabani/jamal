@@ -86,10 +86,10 @@ kappa_m_ge = Constant(kappa * epsilon / 10)
 
 # Define the traction force and predescribed displacement
 def u_starx(t):
-     return 2 * cos(pi * t - pi/2)
+	return cos(2 * pi * t - pi/2)
 
 def u_stary(t):
-     return 2 * sin(pi * t - pi/2) + 2
+	return sin(2 * pi * t - pi/2) + 1
 
 # f = Constant((0, -1.0))
 
@@ -182,6 +182,8 @@ def sigma_r(u, Id):
 # Define test function and beam displacement
 v = TestFunction(VV)
 u = Function(VV, name = "Displacement")
+uu = Function(VV, name = "Time displacement")
+us = Function(VV, name = "Time displacement")
 us = Function(VV, name = "Displacement")
 p = Function(VV, name = "Adjoint variable")
 
@@ -331,8 +333,13 @@ def FormObjectiveGradient(tao, x, G):
 
 			# rho_g.interpolate(sin(2 * pi * t) * rho.sub(2))
 			# print(y_t(t), t)
+			ux = u_starx(t)
+			uy = u_stary(t)
 
-			rho_g.interpolate(y_t(t) * rho.sub(2))
+			u_star = Constant((ux, uy))
+			uu.interpolate(u_star)
+
+			rho_g.interpolate(rho.sub(2))
 
 			R_heat_forward2 = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * rho_g) * w * dx
 			solve(R_heat_forward2 == 0, s, bcs = bcss)
@@ -340,10 +347,16 @@ def FormObjectiveGradient(tao, x, G):
 
 			# Step 2: Solve forward PDE
 			solve(R_fwd_s == 0, u, bcs = bcs)
-               
+
+			u_array = u.vector().array().reshape(16068, 2)
+			uu_array = uu.vector().array().reshape(16068, 2)
+		
+			uu_array = u_array * uu_array
+			us.vector()[:] = uu_array
+			
 			# ave_u.interpolate(assemble(u * dx(4)))
-			beam.write(rho_i, rho_str, rho_res, rho_g, s, u, time = t)
-			vtkfile.write(s, u, ave_u, time = t)
+			beam.write(rho_i, rho_str, rho_res, rho_g, s, us, time = t)
+			vtkfile.write(s, us, ave_u, time = t)
 	
 	t = 0
 	for n in range(num_steps):

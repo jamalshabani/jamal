@@ -19,7 +19,7 @@ t = 0
 vtk = File("haha/haha.pvd")
 
 for n in range(11):
-     u_star = Constant((cos(pi * t - pi/2), sin(pi * t - pi/2)))
+     u_star = Constant((cos(2 * pi * t - pi/2), sin(2 * pi * t - pi/2) + 1))
      u.interpolate(u_star)
 
      uu_star = Constant((8, 6))
