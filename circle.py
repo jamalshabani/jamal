@@ -86,22 +86,10 @@ kappa_m_ge = Constant(kappa * epsilon / 10)
 
 # Define the traction force and predescribed displacement
 def u_starx(t):
-	return cos(2 * pi * t - pi/2)
+	return 2 * cos(pi * t - pi/2)
 
 def u_stary(t):
-	return sin(2 * pi * t - pi/2) + 1
-
-# f = Constant((0, -1.0))
-
-def y_t(t):
-	if 0 <= t < 0.25:
-		return 1 - sqrt(1 - 16 * pow(t, 2))
-	if 0.25 <= t < 0.5:
-		return 1 + sqrt(1 - pow((2 - 4 * t), 2))
-	if 0.5 <= t < 0.75:
-		return 1 + sqrt(1 - pow((2 - 4 * t), 2))
-	if 0.75 <= t <= 1.5:
-		return 1 - sqrt(1 - pow((4 - 4 * t), 2))
+	return 2 * sin(pi * t - pi/2) + 2
 
 # Young's modulus of the beam and poisson ratio
 E_v = Constant(delta)
@@ -195,8 +183,8 @@ q = Function(V, name = "Adjoint variable heat")
 bcs = DirichletBC(VV, Constant((0, 0)), 7)
 bcss = DirichletBC(V, Constant(0), 7)
 
-T = 1.0            # Final time
-num_steps = 20     # Number of time steps
+T = 2.0            # Final time
+num_steps = 10     # Number of time steps
 dt = T / num_steps # Time step size
 
 # Define the objective function
