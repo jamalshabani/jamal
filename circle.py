@@ -86,10 +86,10 @@ kappa_m_ge = Constant(kappa * epsilon / 10)
 
 # Define the traction force and predescribed displacement
 def u_starx(t):
-	return 2 * cos(pi * t - pi/2)
+	return cos(pi * t - pi/2)
 
 def u_stary(t):
-	return 2 * sin(pi * t - pi/2) + 2
+	return sin(pi * t - pi/2) + 1
 
 # Young's modulus of the beam and poisson ratio
 E_v = Constant(delta)
@@ -184,7 +184,7 @@ bcs = DirichletBC(VV, Constant((0, 0)), 7)
 bcss = DirichletBC(V, Constant(0), 7)
 
 T = 2.0            # Final time
-num_steps = 10     # Number of time steps
+num_steps = 20     # Number of time steps
 dt = T / num_steps # Time step size
 
 # Define the objective function
@@ -317,14 +317,17 @@ def FormObjectiveGradient(tao, x, G):
 		vtkfile = File(options.output + '/iteration-{}/ustimulus.pvd'.format(i))
 
 		for n in range(num_steps):
-			t += dt
-
-			# rho_g.interpolate(sin(2 * pi * t) * rho.sub(2))
-			# print(y_t(t), t)
 			ux = u_starx(t)
 			uy = u_stary(t)
 
 			u_star = Constant((ux, uy))
+			print(u_star, t)
+
+			t += dt
+
+			# rho_g.interpolate(sin(2 * pi * t) * rho.sub(2))
+			# print(y_t(t), t)
+
 			uu.interpolate(u_star)
 
 			rho_g.interpolate(rho.sub(2))
