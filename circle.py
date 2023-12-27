@@ -92,7 +92,7 @@ def u_stary(t):
 	return sin(pi * t - pi/2) + 1
 
 
-def f(t):
+def ff(t):
 	if 0 <= t <= 1:
 		return Constant((0, -1))
 	else:
@@ -381,9 +381,9 @@ def FormObjectiveGradient(tao, x, G):
 
 		u_star = Constant((ux, uy))
 
-		f = f(t)
+		f = ff(t)
 
-		print(t, u_star, f)
+		# print(t, u_star, f)
 
 		L_adjoint = inner(u - u_star, v) * dx(4)
 		R_adj = a_adjoint - L_adjoint
