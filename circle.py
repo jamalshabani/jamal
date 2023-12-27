@@ -91,6 +91,13 @@ def u_starx(t):
 def u_stary(t):
 	return sin(pi * t - pi/2) + 1
 
+
+def f(t):
+	if 0 <= t <= 1:
+		return Constant((0, -1))
+	else:
+		return Constant((0, 1))
+
 # Young's modulus of the beam and poisson ratio
 E_v = Constant(delta)
 E_s = Constant(options.esmodulus)
@@ -321,7 +328,7 @@ def FormObjectiveGradient(tao, x, G):
 			uy = u_stary(t)
 
 			u_star = Constant((ux, uy))
-			print(u_star, t)
+			# print(u_star, t)
 
 			t += dt
 
@@ -374,9 +381,9 @@ def FormObjectiveGradient(tao, x, G):
 
 		u_star = Constant((ux, uy))
 
-		f = Constant((-1 * ux, -1 * uy))
+		f = f(t)
 
-		# print(t, u_star, f)
+		print(t, u_star, f)
 
 		L_adjoint = inner(u - u_star, v) * dx(4)
 		R_adj = a_adjoint - L_adjoint
