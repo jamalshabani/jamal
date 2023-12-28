@@ -96,7 +96,7 @@ def ff(t):
 	if 0 <= t <= 1:
 		return Constant((0, -1))
 	else:
-		return Constant((0, 1))
+		return Constant((0, -1))
 
 # Young's modulus of the beam and poisson ratio
 E_v = Constant(delta)
