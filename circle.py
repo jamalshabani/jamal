@@ -94,7 +94,7 @@ def u_stary(t):
 
 def ff(t):
 	if 0 <= t <= 1:
-		return Constant((0, -1))
+		return Constant((0, 1))
 	else:
 		return Constant((0, -1))
 
