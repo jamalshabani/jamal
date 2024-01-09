@@ -1,7 +1,7 @@
 import subprocess
 
 program_list = ["rm -rf test1", "rm -rf test2", "rm -rf test3", "rm -rf test4",
-                "python3 circle.py -tao_monitor -tao_max_it 1000 -tao_ls_type armijo -o test1 -k 1.0e-3 -e 1.0e-2 -ls 0.02 -lr 3.0"]
+                "python3 circle.py -tao_monitor -tao_max_it 5000 -tao_ls_type armijo -o test1 -k 1.0e-3 -e 1.0e-2 -ls 0.02 -lr 3.0"]
 
 
 i = 1
