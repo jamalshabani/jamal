@@ -341,7 +341,7 @@ def FormObjectiveGradient(tao, x, G):
 
 			R_heat_forward2 = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * rho_g) * w * dx
 			solve(R_heat_forward2 == 0, s, bcs = bcss)
-			s_0.assign(s)
+			s_0.assign(s) 
 
 			# Step 2: Solve forward PDE
 			solve(R_fwd_s == 0, u, bcs = bcs)
