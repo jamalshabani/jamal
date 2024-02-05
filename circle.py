@@ -86,10 +86,10 @@ kappa_m_ge = Constant(kappa * epsilon / 10)
 
 # Define the traction force and predescribed displacement
 def u_starx(t):
-	return cos(pi * t - pi/2)
+	return cos(2 * pi * t - pi/2)
 
 def u_stary(t):
-	return sin(pi * t - pi/2) + 1
+	return sin(2 * pi * t - pi/2) + 1
 
 
 def ff(t):
@@ -190,7 +190,7 @@ q = Function(V, name = "Adjoint variable heat")
 bcs = DirichletBC(VV, Constant((0, 0)), 7)
 bcss = DirichletBC(V, Constant(0), 7)
 
-T = 2.0            # Final time
+T = 1.0            # Final time
 num_steps = 20     # Number of time steps
 dt = T / num_steps # Time step size
 
@@ -337,11 +337,11 @@ def FormObjectiveGradient(tao, x, G):
 
 			uu.interpolate(u_star)
 
-			rho_g.interpolate(rho.sub(2))
+			rho_g.interpolate((1 + power((1 - t**2), 0.5)) * rho.sub(2))
 
 			R_heat_forward2 = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * rho_g) * w * dx
 			solve(R_heat_forward2 == 0, s, bcs = bcss)
-			s_0.assign(s) 
+			s_0.assign(s)
 
 			# Step 2: Solve forward PDE
 			solve(R_fwd_s == 0, u, bcs = bcs)
