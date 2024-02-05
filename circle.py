@@ -337,7 +337,7 @@ def FormObjectiveGradient(tao, x, G):
 
 			uu.interpolate(u_star)
 
-			rho_g.interpolate((1 + power((1 - t**2), 0.5)) * rho.sub(2))
+			rho_g.interpolate(uy * rho.sub(2))
 
 			R_heat_forward2 = s * w * dx + dt * k(rho) * inner(grad(s), grad(w)) * dx - (s_0 + dt * rho_g) * w * dx
 			solve(R_heat_forward2 == 0, s, bcs = bcss)
